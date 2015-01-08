@@ -64,4 +64,10 @@ public class Vector3 {
 	public String toString() {
 		return "Vector3 " + x + ", " + y + ", " + z;
 	}
+
+	public void mul(float amt) {
+		x *= amt;
+		y *= amt;
+		z *= amt;
+	}
 }

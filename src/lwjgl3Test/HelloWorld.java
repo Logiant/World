@@ -4,6 +4,7 @@ import org.lwjgl.Sys;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 
+import util.Time;
 import input.*;
 
 import java.nio.ByteBuffer;
@@ -72,7 +73,7 @@ public class HelloWorld {
         int HEIGHT = 600;
 
         // Create the window
-        window = glfwCreateWindow(WIDTH, HEIGHT, "Hello World!", NULL, NULL);
+        window = glfwCreateWindow(WIDTH, HEIGHT, "VOXGL3", NULL, NULL);
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
 
@@ -104,7 +105,7 @@ public class HelloWorld {
         GLContext.createFromCurrent();
         mouse.initialize(window);
         game.initialize(window);
-
+        glClearColor(135/255f,	206/255f,	250/255f,1);
 		glEnable(GL_DEPTH_TEST);
         
     }
@@ -113,6 +114,8 @@ public class HelloWorld {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwSwapInterval(0);
         while ( glfwWindowShouldClose(window) == GL_FALSE ) {
+        	Time.update();
+ //       	System.out.println("fps: " + (1f/(Time.dt/1000)));
             // wipe the drawing surface clear
             glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             //update inputs

@@ -5,6 +5,7 @@ import input.Keyboard;
 import org.lwjgl.glfw.GLFW;
 
 import util.Matrix4;
+import util.Time;
 import util.Vector3;
 
 public class Camera {
@@ -16,7 +17,7 @@ public class Camera {
 	private Vector3 position;
 	private Vector3 rotation;
 	
-	private float speed = 0.001f;
+	private float speed = 10f;
 	Vector3 linVel;
 	Vector3 rotVel;
 	
@@ -26,8 +27,8 @@ public class Camera {
 	
 	public Camera(long window) {
 		this.window = window;
-		position = new Vector3();
-		rotation = new Vector3();
+		position = new Vector3(0, 0, 0);
+		rotation = new Vector3(0, 180, 0);
 	}
 	
 	public void update() {
@@ -51,10 +52,15 @@ public class Camera {
 			rotVel.y += speed*10;
 		}if (Keyboard.keyDown(GLFW.GLFW_KEY_Q, window)) {
 			rotVel.y -= speed*10;
+		}if (Keyboard.keyDown(GLFW.GLFW_KEY_F, window)) {
+			rotVel.x += speed*10;
+		}if (Keyboard.keyDown(GLFW.GLFW_KEY_R, window)) {
+			rotVel.x -= speed*10;
 		}
+		linVel.mul(Time.dt / 1000); //convert to m/s
+		rotVel.mul(Time.dt / 1000); //convert to rad/s
 		rotation.add(rotVel);
 		position.add(Vector3.rotate(linVel, new Vector3(-rotation.x, -rotation.y, -rotation.z)));
-		System.out.println(linVel);
 		updateView();
 	}
 	
