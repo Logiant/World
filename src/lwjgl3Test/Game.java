@@ -1,6 +1,5 @@
 package lwjgl3Test;
 
-import generation.Voxel;
 import generation.World;
 
 public class Game {
@@ -14,18 +13,7 @@ public class Game {
 		cam = new Camera(window);
 		world = new World();
 		this.window = window;
-	/*	float[] tri = new float[]
-                {
-                0.0f,  1f,  0.0f, 1f,
-                0.5f, -0.5f,  0.0f, 1f,
-                -0.5f, -0.5f,  0.0f, 1f}; //x y z w
-		float[] color = new float[] {
-		1, 1, 1, 1,
-		1, 1, 1, 1,
-		1, 1, 1, 1 }; //r g b a
-		
-		int[] indices = new int[] {0, 1, 2};
-     */
+
         world.Build();
 		triangle = new VBORender();
         triangle.initialize(world.getVerts(), world.getColors(), world.getIndices());

@@ -25,11 +25,14 @@ public class World {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < depth; j++) {
 				int zoneHeight = (int)(heightMap[i][j] * (height/3f) + (2*height/3f));
-				for (int h = 0; h < zoneHeight; h++) {
+				for (int h = 0; h < height; h++) {
 					world[i][j][h] = new Voxel(voxelSize);
 					world[i][j][h].translate(new Vector3(i*voxelSize, h*voxelSize, j*voxelSize));
 					world[i][j][h].indexOffset(numVoxels * 8);
 					numVoxels ++;
+					if (h > zoneHeight) {
+						world[i][j][h].hidden = true;
+					}
 				}
 			}
 		}
@@ -40,7 +43,7 @@ public class World {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < depth; j++) {
 				for (int h = 0; h < height; h++) {
-					if (world[i][j][h] != null) {
+					if (!world[i][j][h].hidden) {
 						verts = combine(verts, world[i][j][h].verts);
 					}
 				}
@@ -69,7 +72,7 @@ public class World {
 			for (int j = 0; j < depth; j++) {
 				for (int h = 0; h < height; h++) {
 					if (world[i][j][h] != null) {
-						inds = combine(inds, world[i][j][h].indices);
+						inds = combine(inds, world[i][j][h].getIndices(Face.ALL));
 					}
 				}
 			}

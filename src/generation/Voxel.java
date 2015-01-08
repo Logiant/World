@@ -2,11 +2,17 @@ package generation;
 
 import util.Vector3;
 
+enum Face {
+	TOP, BOTTOM, NEAR, FAR, LEFT, RIGHT, ALL;
+}
+
 public class Voxel {
 	
 	public float[] verts;
 	public float[] colors;
 	public int[] indices;
+	
+	public boolean hidden;
 	
 	public Voxel(float size) {
 		verts = new float[] {//X, 	Y, 		Z,		 W
@@ -41,6 +47,35 @@ public class Voxel {
 							0, 2, 6, //left near
 							3, 5, 7, //right far
 							1, 3, 5};//right near
+	}
+	
+	public int[] getIndices(Face f) {
+		int[] indices = null;
+		switch (f) {
+		default:
+		case ALL:
+			indices = new int[this.indices.length];
+			System.arraycopy(this.indices, 0, indices, 0, this.indices.length);
+			break;
+		case TOP:
+			indices = new int[] {0};
+			break;
+		case BOTTOM:
+			indices = new int[] {0};
+			break;
+		case NEAR:
+			indices = new int[] {0};
+			break;
+		case FAR:
+			indices = new int[] {0};
+			break;
+		case LEFT:
+			indices = new int[] {0};
+			break;
+		case RIGHT:
+			break;
+		}
+		return indices;
 	}
 	
 	public void translate(Vector3 transform) {
