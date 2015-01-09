@@ -13,6 +13,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL40;
 
 import util.Matrix4;
 
@@ -97,6 +98,10 @@ public class VBORender {
 
 		// Draw the vertices
 		GL11.glDrawElements(GL11.GL_TRIANGLES, indicesCount, GL11.GL_UNSIGNED_INT, 0);
+		
+		if (GL11.glGetError() != GL11.GL_NO_ERROR) {
+			System.out.println("RENDER ERROR!");
+		}
 
 		// Put everything back to default (deselect)
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
