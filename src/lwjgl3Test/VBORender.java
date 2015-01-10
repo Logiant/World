@@ -121,11 +121,13 @@ public class VBORender {
 		pId = GL20.glCreateProgram();
 		GL20.glAttachShader(pId, vsId);
 		GL20.glAttachShader(pId, fsId);
-		GL20.glLinkProgram(pId);
 		// Position information will be attribute 0
 		GL20.glBindAttribLocation(pId, 0, "in_Position");
 		// Color information will be attribute 1
 		GL20.glBindAttribLocation(pId, 1, "in_Color");
+		
+		GL20.glLinkProgram(pId);
+
 		GL20.glValidateProgram(pId);
 		errorCheckValue = GL11.glGetError();
 		if (errorCheckValue != GL11.GL_NO_ERROR) {
