@@ -13,7 +13,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL40;
 
 import util.Matrix4;
 
@@ -62,18 +61,22 @@ public class VBORender {
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorsBuffer, GL15.GL_STATIC_DRAW);
 		GL20.glVertexAttribPointer(1, 4, GL11.GL_FLOAT, false, 0, 0);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-		// Deselect (bind to 0) the VAO
-		GL30.glBindVertexArray(0);
+		GL20.glEnableVertexAttribArray(0);
+		GL20.glEnableVertexAttribArray(1);
 		// Create a new VBO for the indices and select it (bind) - INDICES
 		vboiId = GL15.glGenBuffers();
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboiId);
 		GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL15.GL_STATIC_DRAW);
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
+		// Bind to the index VBO that has all the information about the order of the vertices
+		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboiId);
+		// Deselect (bind to 0) the VAO
+		GL30.glBindVertexArray(0);
+		GL20.glUseProgram(pId);
 	}
 
 	public void update(Matrix4 transform) {
 		//bind the shaders
-		GL20.glUseProgram(pId);
 		//grab the MVP matrix location in the shaders
 		int loc = GL20.glGetUniformLocation(pId, "MVP");
 		//load the transform matrix into a float buffer
@@ -82,33 +85,14 @@ public class VBORender {
 		buffer.flip();
 		//load the matrix into the program and then unbind it
 		GL20.glUniformMatrix4(loc, false, buffer);
-		GL20.glUseProgram(0);
 	}
 
 	public void render() {
-		GL20.glUseProgram(pId);
-
 		// Bind to the VAO that has all the information about the vertices and colors
 		GL30.glBindVertexArray(vaoId);
-		GL20.glEnableVertexAttribArray(0);
-		GL20.glEnableVertexAttribArray(1);
-
-		// Bind to the index VBO that has all the information about the order of the vertices
-		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboiId);
-
 		// Draw the vertices
 		GL11.glDrawElements(GL11.GL_TRIANGLES, indicesCount, GL11.GL_UNSIGNED_INT, 0);
-		
-		if (GL11.glGetError() != GL11.GL_NO_ERROR) {
-			System.out.println("RENDER ERROR!");
-		}
-
-		// Put everything back to default (deselect)
-		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
-		GL20.glDisableVertexAttribArray(0);
-		GL20.glDisableVertexAttribArray(1);
 		GL30.glBindVertexArray(0);
-		GL20.glUseProgram(0);
 	}
 
 	private void shaderSetup() {
