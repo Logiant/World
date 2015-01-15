@@ -7,17 +7,17 @@ public class HeightMap {
 	private static Random rGen = new Random();
 	
 	/**
-	 * returns a hightmap with highes normalized to [0, 1]
+	 * returns a heightmap with integer heights from [0, maxHeight] with plains generation
 	 * @param width desired width of map
 	 * @param height desired height of map
 	 */
-	public static float[][] Generate(int width, int height, int wRes, int vRes, long seed) {
+	public static int[][] GeneratePlains(int width, int height, int wRes, int vRes, long seed, int maxHeight) {
 		rGen.setSeed(seed);
 
-		float[][] map = new float[width][height];
+		int[][] map = new int[width][height];
 		for (int i = 0; i < width; i += wRes) {
 			for (int j = 0; j < height; j+= vRes) {
-				map[i][j] = rGen.nextFloat();
+				map[i][j] = rGen.nextInt(maxHeight - 3*maxHeight/4) + 3*maxHeight/4;
 			}
 		}
 		for (int j = 0; j < height; j += 1) {
@@ -36,14 +36,14 @@ public class HeightMap {
 					}if (yR != 0) {
 						ly += vRes;
 					}
-					map[i][j] = interpolate(map, lx, rx, uy, ly, (float)xR/wRes, (float)yR/vRes);
+					map[i][j] = (int)(interpolate(map, lx, rx, uy, ly, (float)xR/wRes, (float)yR/vRes) + .5);
 				}
 			}
 		}
 		return map;
 	}
 	
-	private static float interpolate(float[][] map, int xl, int xr, int yu, int yl, float dx, float dy) {
+	private static float interpolate(int[][] map, int xl, int xr, int yu, int yl, float dx, float dy) {
 		float topVal = (map[xl][yu]*(1-dx) + map[xr][yu]*(dx));
 		float botVal = (map[xl][yl]*(1-dx) + map[xr][yl]*(dx));
 		return (topVal*(1-dy) + botVal*(dy));

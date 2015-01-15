@@ -35,17 +35,17 @@ public class Voxel {
 								107/255f,142/255f,	35/255f,1};//far UR
 		
 		indices = new int[] {
-							0, 1, 2, //near lower
+							1, 0, 2, //near lower
 							1, 2, 3, //near upper
-							2, 3, 6, //top near
+							3, 2, 6, //top near
 							3, 6, 7, //top far
-							6, 7, 4, //far upper
+							7, 6, 4, //far upper
 							4, 5, 7, //far lower
-							4, 5, 1, //bottom far
-							1, 0, 4, //bottom near
-							6, 4, 0, //left far
-							0, 2, 6, //left near
-							3, 5, 7, //right far
+			//				5, 4, 1, //bottom far
+			//				0, 1, 4, //bottom near
+							4, 6, 0, //left far
+							2, 0, 6, //left near
+							5, 3, 7, //right far
 							1, 3, 5};//right near
 	}
 	

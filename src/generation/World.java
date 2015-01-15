@@ -19,19 +19,23 @@ public class World {
 	public void Build() {
 		width = 31;
 		depth = 31;
-		height = 10;
-		float[][] heightMap = HeightMap.Generate(width, depth, 3, 3, seed);
+		height = 25;
+		int[][] heightMap = HeightMap.GeneratePlains(width, depth, 3, 3, seed, height);
 		world = new Voxel[width][depth][height];
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < depth; j++) {
-				int zoneHeight = (int)(heightMap[i][j] * (height/3f) + (2*height/3f));
+				int zoneHeight = (heightMap[i][j]);
 				for (int h = 0; h < height; h++) {
 					world[i][j][h] = new Voxel(voxelSize);
 					world[i][j][h].translate(new Vector3(i*voxelSize, h*voxelSize, j*voxelSize));
-					world[i][j][h].indexOffset(numVoxels * 8);
+					world[i][j][h].hidden = true;
+		//			world[i][j][h].indexOffset(numVoxels * 8);
 					numVoxels ++;
-					if (h > zoneHeight) {
-						world[i][j][h].hidden = true;
+					if (h == zoneHeight || (h <= zoneHeight && i > 0 && heightMap[i-1][j] < h)
+							|| (h <= zoneHeight && i < width-1 && heightMap[i+1][j] < h)
+							|| (h <= zoneHeight && j > 0 && heightMap[i][j-1] < h)
+							|| (h <= zoneHeight && j < depth-1 && heightMap[i][j+1] < h)) {
+						world[i][j][h].hidden = false;
 					}
 				}
 			}
@@ -57,7 +61,7 @@ public class World {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < depth; j++) {
 				for (int h = 0; h < height; h++) {
-					if (world[i][j][h] != null) {
+					if (!world[i][j][h].hidden) {
 						cols = combine(cols, world[i][j][h].colors);
 					}
 				}
@@ -67,19 +71,22 @@ public class World {
 	}
 	
 	public int[] getIndices() {
+		int offset = 0;
 		int[] inds = new int[0];
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < depth; j++) {
 				for (int h = 0; h < height; h++) {
-					if (world[i][j][h] != null) {
+					if (!world[i][j][h].hidden) {
+						world[i][j][h].indexOffset(offset);
 						inds = combine(inds, world[i][j][h].getIndices(Face.ALL));
+						offset += 8;
 					}
 				}
 			}
 		}
 		return inds;
 	}
-	
+
 	
 	private int[] combine(int[] a, int[] b){
         int length = a.length + b.length;
