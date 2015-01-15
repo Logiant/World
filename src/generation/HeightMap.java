@@ -31,9 +31,9 @@ public class HeightMap {
 					int rx = lx; //don't change if on defined
 					int uy = y*vRes; //topmost initial y
 					int ly = uy; //don't change if on defined
-					if (xR!= 0) {
+					if (xR!= 0 && rx + wRes < width) {
 						rx += wRes;
-					}if (yR != 0) {
+					}if (yR != 0 && ly + vRes < height) {
 						ly += vRes;
 					}
 					map[i][j] = (int)(interpolate(map, lx, rx, uy, ly, (float)xR/wRes, (float)yR/vRes) + .5);

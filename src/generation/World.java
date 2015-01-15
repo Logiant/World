@@ -17,10 +17,10 @@ public class World {
 	Voxel[][][] world;
 	
 	public void Build() {
-		width = 31;
-		depth = 31;
-		height = 25;
-		int[][] heightMap = HeightMap.GeneratePlains(width, depth, 3, 3, seed, height);
+		width = 16;
+		depth = 16;
+		height = 16;
+		int[][] heightMap = HeightMap.GeneratePlains(width, depth, 4, 4, seed, height);
 		world = new Voxel[width][depth][height];
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < depth; j++) {
