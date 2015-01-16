@@ -5,7 +5,7 @@ import generation.World;
 public class Game {
 
 	long window;
-	VBORender triangle;
+	VBORender graphics;
 	Camera cam;
 	World world;
 	
@@ -14,19 +14,20 @@ public class Game {
 		world = new World();
 		this.window = window;
 
-        world.Build();
-		triangle = new VBORender();
-        triangle.initialize(world.getVerts(), world.getColors(), world.getIndices());
+		graphics = new VBORender();
+		graphics.initialize();
+		
+        world.Build(graphics);
 	}
 	
 	public void update() {
 		cam.update();
 		
-		triangle.update(cam.getView());
+		graphics.update(cam.getView());
 		render();
 	}
 	
 	public void render() {
-		triangle.render();
+		world.render();
 	}
 }

@@ -1,4 +1,4 @@
-package generation;
+package world;
 
 import util.Vector3;
 

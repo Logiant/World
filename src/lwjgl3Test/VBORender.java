@@ -18,21 +18,20 @@ import util.Matrix4;
 
 public class VBORender {
 
-	FloatBuffer verts;
-	int vaoId;
-	int vboId;
-	int vbocId;
-	int vboiId;
 	int transLoc;
 
-	int indicesCount;
 	//shader values
 	int vsId; //vertex shader
 	int fsId; //fragment shader
 	int pId; //shader program id
 
-	public void initialize(float[] vertices, float[] colors, int[] indices) {
+	public void initialize() {
 		shaderSetup();
+
+		GL20.glUseProgram(pId);
+	}
+	
+	public int createVBO(float[] vertices, float[] colors, int[] indices) {
 		//create the buffers to hold vertex color and index data
 		FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(vertices.length);
 		verticesBuffer.put(vertices);
@@ -42,21 +41,21 @@ public class VBORender {
 		colorsBuffer.put(colors);
 		colorsBuffer.flip();
 		// OpenGL expects vertices in counter clockwise order by default
-		indicesCount = indices.length;
+		int indicesCount = indices.length;
 		IntBuffer indicesBuffer = BufferUtils.createIntBuffer(indicesCount);
 		indicesBuffer.put(indices);
 		indicesBuffer.flip();
 		// Create a new Vertex Array Object in memory and select it (bind)
-		vaoId = GL30.glGenVertexArrays();
+		int vaoId = GL30.glGenVertexArrays();
 		GL30.glBindVertexArray(vaoId);
 		// Create a new Vertex Buffer Object in memory and select it (bind) - VERTICES
-		vboId = GL15.glGenBuffers();
+		int vboId = GL15.glGenBuffers();
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, verticesBuffer, GL15.GL_STATIC_DRAW);
 		GL20.glVertexAttribPointer(0, 4, GL11.GL_FLOAT, false, 0, 0);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		// Create a new VBO for the indices and select it (bind) - COLORS
-		vbocId = GL15.glGenBuffers();
+		int vbocId = GL15.glGenBuffers();
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbocId);
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorsBuffer, GL15.GL_STATIC_DRAW);
 		GL20.glVertexAttribPointer(1, 4, GL11.GL_FLOAT, false, 0, 0);
@@ -64,7 +63,7 @@ public class VBORender {
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glEnableVertexAttribArray(1);
 		// Create a new VBO for the indices and select it (bind) - INDICES
-		vboiId = GL15.glGenBuffers();
+		int vboiId = GL15.glGenBuffers();
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboiId);
 		GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL15.GL_STATIC_DRAW);
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -72,7 +71,8 @@ public class VBORender {
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboiId);
 		// Deselect (bind to 0) the VAO
 		GL30.glBindVertexArray(0);
-		GL20.glUseProgram(pId);
+		
+		return vaoId;
 	}
 
 	public void update(Matrix4 transform) {
@@ -87,7 +87,7 @@ public class VBORender {
 		GL20.glUniformMatrix4(loc, false, buffer);
 	}
 
-	public void render() {
+	public void render(int vaoId, int indicesCount) {
 		// Bind to the VAO that has all the information about the vertices and colors
 		GL30.glBindVertexArray(vaoId);
 		// Draw the vertices
