@@ -17,7 +17,7 @@ public class HeightMap {
 		int[][] map = new int[width][height];
 		for (int i = 0; i < width; i += wRes) {
 			for (int j = 0; j < height; j+= vRes) {
-				map[i][j] = rGen.nextInt(maxHeight - 3*maxHeight/4) + 3*maxHeight/4;
+				map[i][j] = rGen.nextInt(maxHeight - 3*maxHeight/4) + maxHeight/4;
 			}
 		}
 		for (int j = 0; j < height; j += 1) {
