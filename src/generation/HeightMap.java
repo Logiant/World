@@ -48,4 +48,37 @@ public class HeightMap {
 		float botVal = (map[xl][yl]*(1-dx) + map[xr][yl]*(dx));
 		return (topVal*(1-dy) + botVal*(dy));
 	}
+	
+	
+	public float[][] Diamond(int detail, float roughness) {
+		int size = (int)Math.pow(2,  detail) + 1;
+		int max = size = 1;
+		float[][] map = new float[size][size];
+		map[0][0] = max/2;
+		map[max][0] = max/2;
+		map[max][max] = max/2;
+		map[0][max] = max/2;
+		
+		
+		
+		return map;
+	}
+	
+	private void divide(float[][] map, int size, float roughness, int max) {
+		int x, y, half = size/2;
+		int scale = (int)(roughness * size);
+		if (half < 1) return;
+		
+		for (y = half; y < max; y+= size) {
+			for (x = (y+half) % size; x <= max; x += size) {
+				diamond(x, y, half, (float)Math.random() * scale * 2 - scale);
+			}
+		}
+		divide(map, size/2, roughness, max);
+	}
+	
+	private void diamond(int x, int y, int size, float roughness) {
+		
+	}
+	
 }
