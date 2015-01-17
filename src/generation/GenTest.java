@@ -11,10 +11,9 @@ public class GenTest {
 	long seed = 5;
 	public World world;
 	
-	int width = 1024;
-	int depth = 1024;
+	int size = 257;
 	
-	int height = 125;
+	int height = 65;
 	
 	int[][] map;
 	
@@ -23,17 +22,21 @@ public class GenTest {
 	
 		String directory = System.getProperty("user.dir") + "\\Images";
 		System.out.println("Directory: " + directory);
-		BufferedImage image = new BufferedImage(width, depth, BufferedImage.TYPE_INT_RGB);
+		BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 
 		int a = 255;
 		
-		map = HeightMap.GeneratePlains(width, depth, 15, 32, seed, height);
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < depth; j ++) {
+		float[][] mapds = HeightMap.DiamondSquare(size, 1);
+		float[][] mapp = HeightMap.PerlinNoise(size, size, 30, 44, seed);
+
+
+		
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j ++) {
 				
-				int r = (int)(map[i][j] * 255f / height);
-				int g = (int)(map[i][j] * 255f / height);
-				int b = (int)(map[i][j] * 255f / height);
+				int r = (int)((float)mapp[i][j] * 255f);
+				int g = (int)((float)mapp[i][j] * 255f);
+				int b = (int)((float)mapp[i][j] * 255f);
 						
 				int color = (a << 24) | (r << 16) | (g << 8) | b;
 				image.setRGB(i, j, color);
