@@ -26,8 +26,14 @@ public class GenTest {
 
 		int a = 255;
 		
+		int octavex = 100;
+		int octavey = 100;
+		float persistance = 1.0f;
+		
+		
 		float[][] mapds = HeightMap.DiamondSquare(size, 1);
-		float[][] mapp = HeightMap.PerlinNoise(size, size, 30, 44, seed);
+		float[][] mapp = HeightMap.PerlinNoise(size, size, octavex, octavey, seed, persistance);
+
 
 
 		

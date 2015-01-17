@@ -51,7 +51,7 @@ public class HeightMap {
 
 	/*PERLIN NOISE ALGORITHM*/
 	
-	public static float[][] PerlinNoise(int width, int depth, int dx, int dz, long seed){
+	public static float[][] PerlinNoise(int width, int depth, int dx, int dz, long seed, float persistance){
 		rGen.setSeed(seed);
 		float[][] buffermap = new float[width + 4*dx][depth + 4*dz]; //create map with a buffer
 		for (int i = 0; i < buffermap.length; i += dx) {
@@ -82,7 +82,7 @@ public class HeightMap {
 								
 				float val = cubicInterpolation(below2Val, belowVal, aboveVal, above2Val, zFraction);
 				
-				map[i - 2*dx][j - 2*dz] = val;
+				map[i - 2*dx][j - 2*dz] = val*persistance;
 				
 			}
 		}
