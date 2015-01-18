@@ -49,8 +49,93 @@ public class HeightMap {
 		return (topVal*(1-dy) + botVal*(dy));
 	}
 
+	/*EROSION ALGORITHM*/
+	public static float[][] Erode(float[][] heights, float smoothness) {
+		int width = heights.length;
+		int depth = heights[0].length;
+
+		for (int i = 1; i < width - 1; i++)  {
+			for (int j = 1; j < depth - 1; j++) {
+				float d_max = 0.0f;
+				int[] match = { 0, 0 };
+
+				for (int u = -1; u <= 1; u++) {
+					for (int v = -1; v <= 1; v++) {
+						if(Math.abs(u) + Math.abs(v) > 0) {
+							float d_i = heights[i][j] - heights[i + u][j + v];
+							if (d_i > d_max) {
+								d_max = d_i;
+								match[0] = u; match[1] = v;
+							}
+						}
+					}
+				}
+
+				if(0 < d_max && d_max <= (smoothness / (float)width)) {
+					float d_h = 0.5f * d_max;
+					heights[i][j] -= d_h;
+					heights[i + match[0]][j + match[1]] += d_h;
+				}
+			}
+		}
+		return heights;
+	}
+
+
+	/* SMOOTHING ALGORITHM*/
+	public static float[][] Smooth(float[][] original) {
+		int width = original.length; int depth = original[0].length;
+		float[][] smoothed = new float[width][depth];
+
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < depth; j++) {
+				//for each grid get its neghbors
+				if (i != 0 && i != width-1 && j != 0 && j != depth-1) {
+					float sum = 0; //total value of neighbors
+					for (int u = -1; u <= 1; u++) {
+						for (int v = -1; v <= 1; v++) {
+							sum += original[i+u][j+v];
+						}
+					}
+					smoothed[i][j] = sum/9f;
+				} else {
+					smoothed[i][j] = -10;
+				}
+			}
+		}
+		return smoothed;	
+	}
+
+
+	/*RADIAL GRADIENT ALGORITHM*/
+	public static float[][] RadGrad(int size) {
+		float[][] grad = new float[size][size];
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				
+				double dx = i - size/2.0;
+				double dy = j - size/2.0;
+				
+				float dist = (float)Math.sqrt(dx*dx + dy*dy);
+				float val = 1 - Math.min((dist/size), 1);
+
+				if (dist >= size/2f - 5) {
+					val = 0;
+				}
+				
+				grad[i][j] = val;
+
+			}
+		}
+
+
+
+		return grad;
+	}
+
+
 	/*PERLIN NOISE ALGORITHM*/
-	
+
 	public static float[][] PerlinNoise(int width, int depth, int dx, int dz, long seed, float persistance){
 		rGen.setSeed(seed);
 		float[][] buffermap = new float[width + 4*dx][depth + 4*dz]; //create map with a buffer
@@ -60,17 +145,17 @@ public class HeightMap {
 			}
 		}
 		float[][] map = new float[width][depth];
-		
+
 		for (int i = 2*dx; i < width + 2*dx; i ++) {
 			for (int j = 2*dz; j < depth + 2*dz; j ++) {
-				
-				
+
+
 				int xInt = i/dx;
 				int zInt = j/dz;
 				float xFraction = i%dx / (float)dx;
 				float zFraction = j%dz / (float)dz;
-				
-				
+
+
 				float below2Val = cubicInterpolation(buffermap[(xInt-1)*dx][(zInt-1)*dz], buffermap[xInt*dx][(zInt-1)*dz],
 						buffermap[(xInt+1)*dx][(zInt-1)*dz], buffermap[(xInt+2)*dx][(zInt-1)*dz], xFraction);
 				float belowVal = cubicInterpolation(buffermap[(xInt-1)*dx][zInt*dz], buffermap[xInt*dx][zInt*dz],
@@ -79,18 +164,18 @@ public class HeightMap {
 						buffermap[(xInt+1)*dx][(zInt+1)*dz], buffermap[(xInt+2)*dx][(zInt+1)*dz], xFraction);
 				float above2Val = cubicInterpolation(buffermap[(xInt-1)*dx][(zInt+2)*dz], buffermap[xInt*dx][(zInt+2)*dz],
 						buffermap[(xInt+1)*dx][(zInt+2)*dz], buffermap[(xInt+2)*dx][(zInt+2)*dz], xFraction);
-								
+
 				float val = cubicInterpolation(below2Val, belowVal, aboveVal, above2Val, zFraction);
-				
+
 				map[i - 2*dx][j - 2*dz] = val*persistance;
-				
+
 			}
 		}
-		
+
 		return map;
 	}
-	
-	
+
+
 	private static float cubicInterpolation(float y0, float y1, float y2, float y3, float x) {
 		float P = (y3 - y2) - (y0 - y1);
 		float Q = (y0 - y1) - P;
@@ -98,10 +183,10 @@ public class HeightMap {
 		float S = y1;		
 		return Math.min(Math.max(P*x*x*x + Q*x*x + R*x + S, 0),1);
 	}
-	
-	
-	
-	
+
+
+
+
 	/* DIAMOND SQUARE ALGORITHM */
 
 	public static float[][] DiamondSquare(int size, float roughness) {
