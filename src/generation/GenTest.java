@@ -8,14 +8,14 @@ import javax.imageio.ImageIO;
 
 public class GenTest {
 
-	long seed = 'L' + 'O' + 'G' + 'A' + 'N' + '!';
+	long seed = System.nanoTime();//'L' + 'O' + 'G' + 'A' + 'N' + '!';
 	public World world;
 
-	int size = 2048;
+	int size = 256;
 
 	int height = 65;
 
-	int[][] map;
+	float[][] map;
 
 	//convert the 2d heightmap to an image
 	public GenTest() {
@@ -30,7 +30,7 @@ public class GenTest {
 
 		int a = 255;
 
-		float[][] map = PerlinMap();
+		map = PerlinMap();
 
 
 
@@ -59,7 +59,7 @@ public class GenTest {
 					map[i][j] = 0;
 				} else if (map[i][j] > 0.2) {
 					color = (a << 24) | (255 << 16) | (255 << 8) | 255; //mountains
-					map[i][j] = .5f;
+					map[i][j] = .75f;
 				} else if (map[i][j] < 0.02) {
 					color = (a << 24) | (240 << 16) | (230 << 8) | 140; //beach
 					map[i][j] = .25f;
@@ -140,4 +140,8 @@ public class GenTest {
 		new GenTest();
 	}
 
+	public float[][] getMap() {
+		return map;
+	}
+	
 }

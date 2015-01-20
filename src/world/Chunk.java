@@ -3,13 +3,12 @@ package world;
 import lwjgl3Test.VBORender;
 import util.ArrayHelper;
 import util.Vector3;
-import generation.HeightMap;
 import generation.World;
 
 public class Chunk {
-	static int CHUNK_WIDTH = 16;
-	static int CHUNK_DEPTH = 16;
-	static int CHUNK_HEIGHT = 16;
+	public static final int CHUNK_WIDTH = 16;
+	public static final int CHUNK_DEPTH = 16;
+	public static final int CHUNK_HEIGHT = 16;
 	
 	private int drawId;
 	private int indicesCount;
@@ -18,30 +17,35 @@ public class Chunk {
 	Voxel[][][] world;
 	
 	int dx, dz;
+	int dxc, dzc;
 	
 	public Chunk(int xPos, int zPos) {
-		dx = xPos * CHUNK_WIDTH * World.VOXEL_SIZE;
-		dz = zPos * CHUNK_DEPTH * World.VOXEL_SIZE;
+		dx = xPos * CHUNK_WIDTH;
+		dz = zPos * CHUNK_DEPTH;
+		dxc = dx * World.VOXEL_SIZE;
+		dzc = dz * World.VOXEL_SIZE;
 	}
 	
-	public void Build(Long seed, VBORender graphics) {
-		CHUNK_WIDTH = 16;
-		CHUNK_DEPTH = 16;
-		CHUNK_HEIGHT = 16;
-		int[][] heightmap = HeightMap.GeneratePlains(CHUNK_WIDTH, CHUNK_DEPTH, 4, 4, seed, CHUNK_HEIGHT);
+	public void Build(int[][] map, VBORender graphics) {
 		world = new Voxel[CHUNK_WIDTH][CHUNK_DEPTH][CHUNK_HEIGHT];
 		for (int i = 0; i < CHUNK_WIDTH; i++) {
 			for (int j = 0; j < CHUNK_DEPTH; j++) {
-				int zoneHeight = (heightmap[i][j]);
+				int zoneHeight = map[i + dx][j + dz];
 				for (int h = 0; h < CHUNK_HEIGHT; h++) {
-					world[i][j][h] = new Voxel(World.VOXEL_SIZE);
-					world[i][j][h].translate(new Vector3(i*World.VOXEL_SIZE + dx, h*World.VOXEL_SIZE, j*World.VOXEL_SIZE + dz));
+					if (zoneHeight == 0) {
+						world[i][j][h] = new WaterVoxel(World.VOXEL_SIZE);
+					} else if (zoneHeight <= .25*20 + 1) {
+						world[i][j][h] = new SandVoxel(World.VOXEL_SIZE);
+					} else if (zoneHeight >= .75*20 - 1) {
+						world[i][j][h] = new MountainVoxel(World.VOXEL_SIZE);
+					} else {world[i][j][h] = new Voxel(World.VOXEL_SIZE);}
+					world[i][j][h].translate(new Vector3(i*World.VOXEL_SIZE + dxc, h*World.VOXEL_SIZE, j*World.VOXEL_SIZE + dzc));
 					world[i][j][h].hidden = true;
 					numVoxels ++;
-					if (h == zoneHeight || (h <= zoneHeight && heightmap[Math.abs(i-1)%CHUNK_WIDTH][j] < h)
-							|| (h <= zoneHeight && heightmap[(i+1)%CHUNK_WIDTH][j] < h)
-							|| (h <= zoneHeight && heightmap[i][Math.abs(j-1)%CHUNK_DEPTH] < h)
-							|| (h <= zoneHeight && heightmap[i][(j+1)%CHUNK_DEPTH] < h)) {
+					if (h == zoneHeight || (zoneHeight == 0 && h <= .25*20) || (h < zoneHeight && map[dx+Math.abs(i-1)%map.length][dz+j] < h)
+							|| (h <= zoneHeight && map[dx+(i+1)%map.length][dz+j] < h)
+							|| (h <= zoneHeight && map[dx+i][Math.abs(dz+j-1)%map.length] < h)
+							|| (h <= zoneHeight && map[dx+i][(dz+j+1)%map.length] < h)) {
 						world[i][j][h].hidden = false;
 					}
 				}
