@@ -26,13 +26,19 @@ public class GenTest {
 		System.out.println("Directory: " + directory);
 		BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 		BufferedImage colored = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
-
+		BufferedImage binary = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+		BufferedImage flood = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+		BufferedImage trimmed = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+		BufferedImage mountainMap = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 
 		int a = 255;
 
-		float[][] map = PerlinMap();
+		float[][] map = LandMapP();
+		float[][] binaryMap = new float[size][size];
+		float[][] floodMap = new float[size][size];
 
-
+		float[][] mtns = HeightMap.PerlinNoise(size, size, size/9, size/9, seed*seed, 0.8f);
+	//	mtns = HeightMap.Smooth(HeightMap.Smooth(HeightMap.Smooth(mtns)));
 
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j ++) {
@@ -52,26 +58,32 @@ public class GenTest {
 				color = (a << 24) | (r << 16) | (g << 8) | b;
 				image.setRGB(i, j, color);
 				
-				
+
 				
 				if (map[i][j] == 0) {
 					color = (a << 24) | (61 << 16) | (89 << 8) | 171; //water
-					map[i][j] = 0;
 				} else if (map[i][j] > 0.2) {
 					color = (a << 24) | (255 << 16) | (255 << 8) | 255; //mountains
-					map[i][j] = .5f;
+					binaryMap[i][j] = 1;
 				} else if (map[i][j] < 0.02) {
 					color = (a << 24) | (240 << 16) | (230 << 8) | 140; //beach
-					map[i][j] = .25f;
+					binaryMap[i][j] = 1;
 				} else {
 					color = (a << 24) | (110 << 16) | (139 << 8) | 61; //land
-					map[i][j] = 0.5f;
+					binaryMap[i][j] = 1;
 				}
 				
 				
 				colored.setRGB(i, j, color);
-				
-				
+				binary.setRGB(i, j, (int)(2147483647*binaryMap[i][j]));
+
+				c = (int)((map[i][j] * 2 * map[i][j] * map[i][j] * 2) * 255f * binaryMap[i][j]);
+
+				r = c;
+				g = c;
+				b = c;
+				color = (a << 24) | (r << 16) | (g << 8) | b;
+				mountainMap.setRGB(i, j, color);
 				
 
 				//step through the island and check for connectivity
@@ -89,10 +101,39 @@ public class GenTest {
 
 			}
 		}
+		
+		HeightMap.FloodFill(binaryMap, size/2, size/2, floodMap);
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j ++) {
+				map[i][j] *= floodMap[i][j];
+				int color = 0;
+				
+				if (map[i][j] == 0) {
+					color = (a << 24) | (61 << 16) | (89 << 8) | 171; //water
+				} else if (map[i][j] > 0.2) {
+					color = (a << 24) | (255 << 16) | (255 << 8) | 255; //mountains
+				} else if (map[i][j] < 0.02) {
+					color = (a << 24) | (240 << 16) | (230 << 8) | 140; //beach
+				} else {
+					color = (a << 24) | (110 << 16) | (139 << 8) | 61; //land
+				}
+				
+				trimmed.setRGB(i, j, color);
+
+				
+				
+				flood.setRGB(i, j, (int)(2147483647*floodMap[i][j]));
+			}
+		}
 
 		try {
 			ImageIO.write(image, "png", new File(directory, "WorldGen.png"));
 			ImageIO.write(colored, "png", new File(directory, "Colors.png"));
+			ImageIO.write(binary, "png", new File(directory, "Binary.png"));
+			ImageIO.write(flood, "png", new File(directory, "FloodFill.png"));
+			ImageIO.write(trimmed, "png", new File(directory, "TrimmedMap.png"));
+			ImageIO.write(mountainMap, "png", new File(directory, "MountainMap.png"));
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -101,7 +142,7 @@ public class GenTest {
 	}
 	
 	
-	private float[][] PerlinMap() {
+	private float[][] LandMapP() {
 		float[][] map = new float[size][size];
 		int octavex = size/6;
 		int octavey = size/6;
