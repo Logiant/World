@@ -1,5 +1,7 @@
 package generation;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 
 public class HeightMap {
@@ -82,6 +84,47 @@ public class HeightMap {
 	}
 
 
+	/* RECURSIVE FLOOD FILL ALGORITHM */
+	public static void FloodFill(float[][] original, int x, int y, float[][] target) {
+		int[] position = {x, y}; //current quare
+		
+		Queue<int[]> q = new LinkedList<int[]>();
+		q.add(position);
+		
+		while (!q.isEmpty()) {
+			int[] next;
+			position = q.poll();
+			x = position[0]; y = position[1];
+			if (original[x][y] > 0.5f && target[x][y] != 1) { //if target node hasn't been filled
+				target[x][y] = 1; //set target node to filled
+				//check neighbors
+				if (original[x+1][y] > 0.5 && target[x+1][y] != 1) { // if left node is valid
+					next = new int[] {x+1, y};
+					q.add(next);
+				}if (original[x-1][y] > 0.5 && target[x-1][y] != 1) { // if left node is valid
+					next = new int[] {x-1, y};
+					q.add(next);
+				}if (original[x][y+1] > 0.5 && target[x][y+1] != 1) { // if left node is valid
+					next = new int[] {x, y+1};
+					q.add(next);
+				}if (original[x][y-1] > 0.5 && target[x][y-1] != 1) { // if left node is valid
+					next = new int[] {x, y-1};
+					q.add(next);
+				}
+				
+				
+				
+			}
+			
+			
+			
+		}
+		
+
+		
+	}
+	
+
 	/* SMOOTHING ALGORITHM*/
 	public static float[][] Smooth(float[][] original) {
 		int width = original.length; int depth = original[0].length;
@@ -112,17 +155,17 @@ public class HeightMap {
 		float[][] grad = new float[size][size];
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
-				
+
 				double dx = i - size/2.0;
 				double dy = j - size/2.0;
-				
+
 				float dist = (float)Math.sqrt(dx*dx + dy*dy);
 				float val = 1 - Math.min((dist/size), 1);
 
 				if (dist >= size/2f - 5) {
 					val = 0;
 				}
-				
+
 				grad[i][j] = val;
 
 			}
