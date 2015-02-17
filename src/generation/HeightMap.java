@@ -84,7 +84,7 @@ public class HeightMap {
 	}
 
 
-	/* RECURSIVE FLOOD FILL ALGORITHM */
+	/* STACK FLOOD FILL ALGORITHM */
 	public static void FloodFill(float[][] original, int x, int y, float[][] target) {
 		int[] position = {x, y}; //current quare
 		
