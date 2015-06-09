@@ -83,14 +83,85 @@ public class HeightMap {
 		return heights;
 	}
 
+	/*Voronoi Algorithm*/
+	public static void Voronoi(float[][] map, int numPts) {
+
+		int[] x = new int[numPts];
+		int[] y = new int[numPts];
+		for (int i = 0; i < numPts; i++) {
+			x[i] = rGen.nextInt(map.length - 2*numPts) + numPts;
+			y[i] = rGen.nextInt(map[0].length - 2*numPts) + numPts;
+		}
+
+		float dColor = 1f/(numPts+1);
+		float colorMod = 1;
+
+		for (int i = 0; i < map.length; i++) {
+			for (int j = 0; j < map[0].length; j++) {
+
+				float color = 0;
+				for (int k = 0; k < numPts; k++) {
+					if (i == x[k] && j == y[k]) {
+						color = colorMod;
+						colorMod -= dColor;
+						break;
+					}
+				}
+
+				map[i][j] = color;
+			}
+		}
+		VoronoiFill(map, x, y);
+	}
+
+	private static void VoronoiFill(float[][] map, int[] x0, int[] y0) {
+		Queue<int[]> q = new LinkedList<int[]>();
+		//add all initial positions to the queue
+		for (int k = 0; k < x0.length; k++) {
+			int[] pos = {x0[k], y0[k]};
+			q.add(pos);
+		}
+		//add the four neighbors of each point
+		int[] pos;
+		while(!q.isEmpty()) {
+			pos = q.poll();
+			int x = pos[0]; int y = pos[1];
+			//add all uncolored neighbors
+			//left
+			if (x - 1 >= 0 && map[x-1][y] == 0) {
+				map[x-1][y] = map[x][y];
+				int[] nextPos = {x-1, y};
+				q.add(nextPos);
+			}
+			//top
+			if (y - 1 >= 0 && map[x][y-1] == 0) {
+				map[x][y-1] = map[x][y];
+				int[] nextPos = {x, y-1};
+				q.add(nextPos);
+			} 
+			//right
+			if (x + 1 < map.length && map[x+1][y] == 0) {
+				map[x+1][y] = map[x][y];
+				int[] nextPos = {x+1, y};
+				q.add(nextPos);
+			} 
+			//bottom
+			if (y + 1 < map[0].length && map[x][y+1] == 0) {
+				map[x][y+1] = map[x][y];
+				int[] nextPos = {x, y+1};
+				q.add(nextPos);
+			} 
+		}
+	}
+
 
 	/* STACK FLOOD FILL ALGORITHM */
 	public static void FloodFill(float[][] original, int x, int y, float[][] target) {
-		int[] position = {x, y}; //current quare
-		
+		int[] position = {x, y}; //current square
+
 		Queue<int[]> q = new LinkedList<int[]>();
 		q.add(position);
-		
+
 		while (!q.isEmpty()) {
 			int[] next;
 			position = q.poll();
@@ -111,19 +182,19 @@ public class HeightMap {
 					next = new int[] {x, y-1};
 					q.add(next);
 				}
-				
-				
-				
-			}
-			
-			
-			
-		}
-		
 
-		
+
+
+			}
+
+
+
+		}
+
+
+
 	}
-	
+
 
 	/* SMOOTHING ALGORITHM*/
 	public static float[][] Smooth(float[][] original) {

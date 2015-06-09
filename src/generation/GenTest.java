@@ -16,6 +16,7 @@ public class GenTest {
 	int height = 65;
 
 	float[][] filled;
+	float[][] voronoi;
 
 	//convert the 2d heightmap to an image
 	public GenTest() {
@@ -28,12 +29,16 @@ public class GenTest {
 		BufferedImage colored = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 		BufferedImage filledColored = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 		BufferedImage binary = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+		BufferedImage plates = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+
 
 
 		int a = 255;
 
 		float[][] map = PerlinMap();
 		float[][] mask = new float[size][size];
+		voronoi = new float[size][size];
+		HeightMap.Voronoi(voronoi, 10);
 
 
 		for (int i = 0; i < size; i++) {
@@ -74,6 +79,16 @@ public class GenTest {
 				
 				
 				
+				
+				c = Math.round((voronoi[i][j]) * 255f);
+
+				r = c;
+				g = c;
+				b = c;
+				color = (a << 24) | (r << 16) | (g << 8) | b;
+				
+				plates.setRGB(i, j, color);
+
 
 				//step through the island and check for connectivity
 					//remove outliers
@@ -137,6 +152,7 @@ public class GenTest {
 				
 				
 				
+				
 
 				//step through the island and check for connectivity
 					//remove outliers
@@ -161,6 +177,8 @@ public class GenTest {
 			ImageIO.write(colored, "png", new File(directory, "Colors.png"));
 			ImageIO.write(filledColored, "png", new File(directory, "Filled.png"));
 			ImageIO.write(binary, "png", new File(directory, "Binary.png"));
+			ImageIO.write(plates, "png", new File(directory, "Voronoi.png"));
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

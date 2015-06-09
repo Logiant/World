@@ -14,7 +14,7 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
-public class HelloWorld {
+public class MainGame {
 	
 	//screen info
 	public static int screenWidth = 800;
@@ -130,7 +130,7 @@ public class HelloWorld {
     }
 
     public static void main(String[] args) {
-        new HelloWorld().run();
+        new MainGame().run();
     }
 
 }
