@@ -84,7 +84,7 @@ public class VBORender {
 		transform.store(buffer);
 		buffer.flip();
 		//load the matrix into the program and then unbind it
-		GL20.glUniformMatrix4(loc, false, buffer);
+		GL20.glUniformMatrix4fv(loc, false, buffer);
 	}
 
 	public void render(int vaoId, int indicesCount) {

@@ -51,40 +51,47 @@ public class HeightMap {
 		return (topVal*(1-dy) + botVal*(dy));
 	}
 
-	/*EROSION ALGORITHM*/
-	public static float[][] Erode(float[][] heights, float smoothness) {
+	/*SMOOTHING ALGORITHM*/
+	public static float[][] Smooth(float[][] heights, float maxHeight) {
+		int smoothness = 1; //gaussian kernel size
 		int width = heights.length;
 		int depth = heights[0].length;
-
-		for (int i = 1; i < width - 1; i++)  {
-			for (int j = 1; j < depth - 1; j++) {
-				float d_max = 0.0f;
-				int[] match = { 0, 0 };
-
-				for (int u = -1; u <= 1; u++) {
-					for (int v = -1; v <= 1; v++) {
-						if(Math.abs(u) + Math.abs(v) > 0) {
-							float d_i = heights[i][j] - heights[i + u][j + v];
-							if (d_i > d_max) {
-								d_max = d_i;
-								match[0] = u; match[1] = v;
+		
+		float[][] newVals = new float[width][depth];
+		float maxOut = 0;
+		
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < depth; j++) {
+				float sum = 0;
+				int count = 0;
+				
+				for (int x = -smoothness; x < smoothness; x++) {
+					if (i+x >= 0 && i + x < width) {
+						for (int y = -smoothness; y < smoothness; y++) {
+							if (j + y >= 0 && j + y < depth) {
+								sum += heights[i+x][j+y];
+								count++;
 							}
 						}
 					}
 				}
-
-				if(0 < d_max && d_max <= (smoothness / (float)width)) {
-					float d_h = 0.5f * d_max;
-					heights[i][j] -= d_h;
-					heights[i + match[0]][j + match[1]] += d_h;
+				maxOut = Math.max(maxOut, sum/count);
+				newVals[i][j] = sum/count;
+			}
+		}
+		if (maxOut > 0) {
+			float scale = maxHeight/maxOut;
+			for (int i = 0; i<width; i++) {
+				for (int j = 0; j<depth; j++) {
+					newVals[i][j] *= scale;
 				}
 			}
 		}
-		return heights;
+		return newVals;
 	}
 
 	/*Voronoi Algorithm*/
-	public static void Voronoi(float[][] map, int numPts) {
+	public static float[][] Voronoi(float[][] map, int numPts) {
 
 		int[] x = new int[numPts];
 		int[] y = new int[numPts];
@@ -111,11 +118,17 @@ public class HeightMap {
 				map[i][j] = color;
 			}
 		}
-		VoronoiFill(map, x, y);
+		return VoronoiFill(map, x, y);
 	}
 
-	private static void VoronoiFill(float[][] map, int[] x0, int[] y0) {
+	private static float[][] VoronoiFill(float[][] map, int[] x0, int[] y0) {
 		Queue<int[]> q = new LinkedList<int[]>();
+		float[][] mtns = new float[map.length][map[0].length];
+		for (int i = 0; i < mtns.length; i++) {
+			for (int j = 0; j < mtns[0].length; j++) {
+				mtns[i][j] = 0;
+			}
+		}
 		//add all initial positions to the queue
 		for (int k = 0; k < x0.length; k++) {
 			int[] pos = {x0[k], y0[k]};
@@ -128,16 +141,25 @@ public class HeightMap {
 			int x = pos[0]; int y = pos[1];
 			//add all uncolored neighbors
 			//left
-			if (x - 1 >= 0 && map[x-1][y] == 0) {
-				map[x-1][y] = map[x][y];
-				int[] nextPos = {x-1, y};
-				q.add(nextPos);
+			if (x - 1 >= 0) {
+				if (map[x-1][y] == 0) {
+					map[x-1][y] = map[x][y];
+					int[] nextPos = {x-1, y};
+					q.add(nextPos);
+				} else if (map[x-1][y] != map[x][y]) {
+					mtns[x-1][y] = 1;
+				}
 			}
 			//top
-			if (y - 1 >= 0 && map[x][y-1] == 0) {
-				map[x][y-1] = map[x][y];
-				int[] nextPos = {x, y-1};
-				q.add(nextPos);
+			if (y - 1 >= 0) {
+				if (map[x][y-1] == 0) {
+					map[x][y-1] = map[x][y];
+					int[] nextPos = {x, y-1};
+					q.add(nextPos);
+				}
+				else if (map[x][y-1] != map[x][y]) {
+					mtns[x][y-1] = 1;
+				}
 			} 
 			//right
 			if (x + 1 < map.length && map[x+1][y] == 0) {
@@ -152,6 +174,7 @@ public class HeightMap {
 				q.add(nextPos);
 			} 
 		}
+		return mtns;
 	}
 
 
@@ -195,30 +218,6 @@ public class HeightMap {
 
 	}
 
-
-	/* SMOOTHING ALGORITHM*/
-	public static float[][] Smooth(float[][] original) {
-		int width = original.length; int depth = original[0].length;
-		float[][] smoothed = new float[width][depth];
-
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < depth; j++) {
-				//for each grid get its neghbors
-				if (i != 0 && i != width-1 && j != 0 && j != depth-1) {
-					float sum = 0; //total value of neighbors
-					for (int u = -1; u <= 1; u++) {
-						for (int v = -1; v <= 1; v++) {
-							sum += original[i+u][j+v];
-						}
-					}
-					smoothed[i][j] = sum/9f;
-				} else {
-					smoothed[i][j] = -10;
-				}
-			}
-		}
-		return smoothed;	
-	}
 
 
 	/*RADIAL GRADIENT ALGORITHM*/

@@ -38,9 +38,14 @@ public class GenTest {
 		float[][] map = PerlinMap();
 		float[][] mask = new float[size][size];
 		voronoi = new float[size][size];
-		HeightMap.Voronoi(voronoi, 10);
+		System.out.println("Generating Voronoi");
+		float[][] mtns = HeightMap.Voronoi(voronoi, 10);
+		for (int i = 0; i < 15; i++) {
+			mtns = HeightMap.Smooth(mtns, 0.75f);
+		}
+		mtns = HeightMap.Smooth(mtns, 1);
 
-
+		
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j ++) {
 				
@@ -80,7 +85,7 @@ public class GenTest {
 				
 				
 				
-				c = Math.round((voronoi[i][j]) * 255f);
+				c = Math.round((mtns[i][j]) * 255f);
 
 				r = c;
 				g = c;
@@ -105,6 +110,7 @@ public class GenTest {
 
 			}
 		}
+		System.out.println("Floodfilling");
 		
 		float[][] floodFill = new float[size][size];
 		HeightMap.FloodFill(mask, size/2, size/2, floodFill);
@@ -114,41 +120,10 @@ public class GenTest {
 		
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j ++) {
-				
-				int c = 0;
-				int r = c;
-				int g = c;
-				int b = c;
-				int color = 0;
-				
-				
-				filled[i][j] = map[i][j] * floodFill[i][j];
-				
-				c = Math.round((mask[i][j]) * 255f);
+								
+				filled[i][j] = Math.min(1.75f*(map[i][j] * floodFill[i][j]), 0.6f) ;//+ (mtns[i][j] * floodFill[i][j]), 1);
+				filled[i][j] += (mtns[i][j]*floodFill[i][j]);
 
-				r = c;
-				g = c;
-				b = c;
-				color = (a << 24) | (r << 16) | (g << 8) | b;
-				binary.setRGB(i, j, color);
-				
-				
-				
-				if (filled[i][j] == 0) {
-					color = (a << 24) | (61 << 16) | (89 << 8) | 171; //water
-				} else if (filled[i][j] > 0.2) {
-					color = (a << 24) | (255 << 16) | (255 << 8) | 255; //mountains
-					filled[i][j] = 0.75f;
-				} else if (filled[i][j] < 0.02) {
-					color = (a << 24) | (240 << 16) | (230 << 8) | 140; //beach
-					filled[i][j] = 0.25f;
-				} else {
-					color = (a << 24) | (110 << 16) | (139 << 8) | 61; //land
-					filled[i][j] = 0.5f;
-				}
-				
-				
-				filledColored.setRGB(i, j, color);
 				
 				
 				
@@ -169,8 +144,44 @@ public class GenTest {
 
 			}
 		}
+		//TODO redevelop erosion algorithm
+		//filled = HeightMap.Erode(filled, 1.5f);
 		
 		
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j ++) {
+				
+				filled[i][j] *= floodFill[i][j];
+				
+				filled[i][j] = Math.min(1, filled[i][j]);
+				
+				int c = Math.round((mask[i][j]) * 255f);
+
+				int r = c;
+				int g = c;
+				int b = c;
+				int color = (a << 24) | (r << 16) | (g << 8) | b;
+				binary.setRGB(i, j, color);
+				
+				
+				
+				if (filled[i][j] == 0) {
+					color = (a << 24) | (61 << 16) | (89 << 8) | 171; //water
+				} else if (filled[i][j] > 0.6) {
+					color = (a << 24) | (255 << 16) | (255 << 8) | 255; //mountains
+				//	filled[i][j] = 0.65f;
+				} else if (filled[i][j] < 0.1) {
+					color = (a << 24) | (240 << 16) | (230 << 8) | 140; //beach
+				//	filled[i][j] = 0.25f;
+				} else {
+					color = (a << 24) | (110 << 16) | (139 << 8) | 61; //land
+				//	filled[i][j] = 0.5f;
+				}
+				filledColored.setRGB(i, j, color);
+			}
+		}
+		
+		System.out.println("Writing Images");
 		
 		try {
 			ImageIO.write(image, "png", new File(directory, "WorldGen.png"));

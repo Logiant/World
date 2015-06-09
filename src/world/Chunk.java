@@ -34,15 +34,17 @@ public class Chunk {
 				for (int h = 0; h < CHUNK_HEIGHT; h++) {
 					if (zoneHeight == 0) {
 						world[i][j][h] = new WaterVoxel(World.VOXEL_SIZE);
-					} else if (zoneHeight <= .25*20 + 1) {
+					} else if (zoneHeight <= 0.1*20) {
 						world[i][j][h] = new SandVoxel(World.VOXEL_SIZE);
-					} else if (zoneHeight >= .75*20 - 1) {
+					} else if (zoneHeight >= 0.6*20) {
 						world[i][j][h] = new MountainVoxel(World.VOXEL_SIZE);
 					} else {world[i][j][h] = new Voxel(World.VOXEL_SIZE);}
+					
 					world[i][j][h].translate(new Vector3(i*World.VOXEL_SIZE + dxc, h*World.VOXEL_SIZE, j*World.VOXEL_SIZE + dzc));
 					world[i][j][h].hidden = true;
 					numVoxels ++;
-					if (h == zoneHeight || (zoneHeight == 0 && h <= .25*20) || (h < zoneHeight && map[dx+Math.abs(i-1)%map.length][dz+j] < h)
+					if (h == zoneHeight || (h == CHUNK_HEIGHT && h == zoneHeight) 
+							|| (h < zoneHeight && map[dx+Math.abs(i-1)%map.length][dz+j] < h)
 							|| (h <= zoneHeight && map[dx+(i+1)%map.length][dz+j] < h)
 							|| (h <= zoneHeight && map[dx+i][Math.abs(dz+j-1)%map.length] < h)
 							|| (h <= zoneHeight && map[dx+i][(dz+j+1)%map.length] < h)) {
