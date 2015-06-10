@@ -122,7 +122,7 @@ public class GenTest {
 			for (int j = 0; j < size; j ++) {
 								
 				filled[i][j] = Math.min(1.75f*(map[i][j] * floodFill[i][j]), 0.6f) ;//+ (mtns[i][j] * floodFill[i][j]), 1);
-				filled[i][j] += (mtns[i][j]*floodFill[i][j]);
+			//	filled[i][j] += (mtns[i][j]*floodFill[i][j]);
 
 				
 				
