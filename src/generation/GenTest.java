@@ -10,6 +10,8 @@ public class GenTest {
 
 	long seed = System.nanoTime();//'L' + 'O' + 'G' + 'A' + 'N' + '!';
 	public World world;
+	
+	BiomeDev biomes;
 
 	int size = 256;
 
@@ -194,6 +196,9 @@ public class GenTest {
 			e.printStackTrace();
 		}
 
+		
+		biomes = new BiomeDev(seed);
+		biomes.CreateBiomes(filled, directory);
 
 	}
 	

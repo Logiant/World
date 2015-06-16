@@ -9,37 +9,43 @@ public class Chunk {
 	public static final int CHUNK_WIDTH = 16;
 	public static final int CHUNK_DEPTH = 16;
 	public static final int CHUNK_HEIGHT = 16;
-	
+
 	private int drawId;
 	private int indicesCount;
-	
+
 	int numVoxels;
 	Voxel[][][] world;
-	
+
 	int dx, dz;
 	int dxc, dzc;
-	
+
 	public Chunk(int xPos, int zPos) {
 		dx = xPos * CHUNK_WIDTH;
 		dz = zPos * CHUNK_DEPTH;
 		dxc = dx * World.VOXEL_SIZE;
 		dzc = dz * World.VOXEL_SIZE;
 	}
-	
+
 	public void Build(int[][] map, VBORender graphics) {
+		int[] maxPos = {0, 0};
+		int maxHeight = 0;
 		world = new Voxel[CHUNK_WIDTH][CHUNK_DEPTH][CHUNK_HEIGHT];
 		for (int i = 0; i < CHUNK_WIDTH; i++) {
 			for (int j = 0; j < CHUNK_DEPTH; j++) {
 				int zoneHeight = map[i + dx][j + dz];
+				if (zoneHeight > maxHeight) {
+					maxHeight = zoneHeight;
+					maxPos[0] = i; maxPos[1] = j;
+				}
 				for (int h = 0; h < CHUNK_HEIGHT; h++) {
 					if (zoneHeight == 0) {
 						world[i][j][h] = new WaterVoxel(World.VOXEL_SIZE);
-					} else if (zoneHeight <= 0.1*20) {
+					} else if (zoneHeight < 0.1*20) {
 						world[i][j][h] = new SandVoxel(World.VOXEL_SIZE);
 					} else if (zoneHeight >= 0.6*20) {
 						world[i][j][h] = new MountainVoxel(World.VOXEL_SIZE);
 					} else {world[i][j][h] = new Voxel(World.VOXEL_SIZE);}
-					
+
 					world[i][j][h].translate(new Vector3(i*World.VOXEL_SIZE + dxc, h*World.VOXEL_SIZE, j*World.VOXEL_SIZE + dzc));
 					world[i][j][h].hidden = true;
 					numVoxels ++;
@@ -53,13 +59,59 @@ public class Chunk {
 				}
 			}
 		}
-		
+//		int xMax = Math.max(6, Math.min(maxPos[0], 12)); int zMax = Math.max(6, Math.min(maxPos[1], 12)); int yMax = 1+map[xMax + dx][zMax + dz];
+		if (dx == 128 && dz == 128) {
+	//		buildHouse(xMax, yMax, zMax, world);
+
+		}
 		drawId = graphics.createVBO(getVerts(), getColors(), getIndices());
 		indicesCount = getIndices().length;
 	}
-	
+
 	public void draw(VBORender graphics) {
 		graphics.render(drawId, indicesCount);
+	}
+
+
+	void buildHouse(int x0, int y0, int z0, Voxel[][][] world) {
+		int[] xVerts = {x0, x0+1, x0+2, x0+3, x0, x0+1, x0+2, x0+3, x0, x0+1, x0+2, x0+3, x0, x0+1, x0+2, x0+3,
+				x0, x0+3, x0, x0+3, x0, x0+3, x0, x0+3,
+				x0, x0+3, x0, x0+3, x0, x0+3, x0, x0+3,
+				x0, x0+3, x0, x0+3, x0, x0+3, x0, x0+3,
+				x0, x0+3, x0, x0+3, x0, x0+3, x0, x0+3,
+				x0, x0+1, x0+2, x0+3, x0, x0+1, x0+2, x0+3, x0, x0+1, x0+2, x0+3, x0, x0+1, x0+2, x0+3};
+		
+		int[] yVerts = {y0, y0, y0, y0, y0, y0, y0, y0, y0, y0, y0, y0, y0, y0, y0, y0,
+						y0+1, y0+1, y0+1, y0+1, y0+1, y0+1, y0+1, y0+1,
+						y0+2, y0+2, y0+2, y0+2, y0+2, y0+2, y0+2, y0+2,
+						y0+3, y0+3, y0+3, y0+3, y0+3, y0+3, y0+3, y0+3, 
+						y0+4, y0+4, y0+4, y0+4, y0+4, y0+4, y0+4, y0+4,
+						y0+5, y0+5, y0+5, y0+5, y0+5, y0+5, y0+5, y0+5, y0+5, y0+5, y0+5, y0+5, y0+5, y0+5, y0+5, y0+5,};
+		
+		int[] zVerts = {z0, z0, z0, z0, z0+1, z0+1, z0+1, z0+1, z0+2, z0+2, z0+2, z0+2, z0+3, z0+3, z0+3, z0+3,
+				z0, z0, z0+1, z0+1, z0+2, z0+2, z0+3, z0+3,
+				z0, z0, z0+1, z0+1, z0+2, z0+2, z0+3, z0+3,
+				z0, z0, z0+1, z0+1, z0+2, z0+2, z0+3, z0+3,
+				z0, z0, z0+1, z0+1, z0+2, z0+2, z0+3, z0+3,
+				z0, z0, z0, z0, z0+1, z0+1, z0+1, z0+1, z0+2, z0+2, z0+2, z0+2, z0+3, z0+3, z0+3, z0+3};
+		
+		int size = xVerts.length;
+		
+
+		for (int i = 0; i < size; i++) {
+			int xi = xVerts[i]%CHUNK_WIDTH;
+			int yi = yVerts[i]%CHUNK_HEIGHT;
+			int zi = zVerts[i]%CHUNK_DEPTH;
+			int x = xVerts[i];
+			int y = yVerts[i];
+			int z = zVerts[i];
+			System.out.println(x + ", " + y + " " + z);
+			world[xi][yi][zi] = new WoodVoxel(World.VOXEL_SIZE);
+			world[xi][yi][zi].translate(new Vector3(x*World.VOXEL_SIZE + dxc, y*World.VOXEL_SIZE, z*World.VOXEL_SIZE + dzc));
+			world[xi][yi][zi].hidden = false;
+		}
+
+
 	}
 
 	public float[] getVerts() {
@@ -75,7 +127,7 @@ public class Chunk {
 		}
 		return verts;
 	}
-	
+
 	public float[] getColors() {
 		float[] cols = new float[0];
 		for (int i = 0; i < CHUNK_WIDTH; i++) {
@@ -89,7 +141,7 @@ public class Chunk {
 		}
 		return cols;
 	}
-	
+
 	public int[] getIndices() {
 		int offset = 0;
 		int[] inds = new int[0];

@@ -41,8 +41,8 @@ public class Voxel {
 							3, 6, 7, //top far
 							7, 6, 4, //far upper
 							4, 5, 7, //far lower
-			//				5, 4, 1, //bottom far
-			//				0, 1, 4, //bottom near
+							5, 4, 1, //bottom far
+							0, 1, 4, //bottom near
 							4, 6, 0, //left far
 							2, 0, 6, //left near
 							5, 3, 7, //right far
