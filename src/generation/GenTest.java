@@ -183,6 +183,28 @@ public class GenTest {
 			}
 		}
 		
+		
+		
+		System.out.println("Generating biomes!");
+		biomes = new BiomeDev(seed);
+		biomes.CreateBiomes(filled, directory);
+		
+		
+		float[][] rivers = biomes.getRivers();
+		
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j ++) {
+				if (rivers[i][j] > 0) {
+					int r = 0;
+					int g = 255;
+					int b = 255;
+					int color = (a << 24) | (r << 16) | (g << 8) | b;
+					filledColored.setRGB(i, j, color);
+				}
+			}
+		}
+		
+		
 		System.out.println("Writing Images");
 		
 		try {
@@ -197,8 +219,7 @@ public class GenTest {
 		}
 
 		
-		biomes = new BiomeDev(seed);
-		biomes.CreateBiomes(filled, directory);
+
 
 	}
 	

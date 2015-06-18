@@ -16,6 +16,7 @@ public class BiomeDev {
 	WindGen windGen;
 	WaterGen waterGen;
 	
+	float[][] rivers;
 
 	public BiomeDev(long seed) {
 		rGen = new Random(seed);
@@ -23,6 +24,10 @@ public class BiomeDev {
 		waterGen = new WaterGen(seed);
 	}
 
+	public float[][] getRivers() {
+		return rivers;
+	}
+	
 	public void CreateBiomes(float[][] heightmap, String directory) {
 		int size = heightmap.length;
 		//wind map
@@ -33,8 +38,10 @@ public class BiomeDev {
 
 		//temp + moisture = biome
 
+		
+		System.out.println("Creating Terrain");
 		float[][] windMap = windGen.generateWind(heightmap);
-		float[][] waterMap = waterGen.generateRivers(heightmap);
+		rivers = waterGen.generateRivers(heightmap);
 
 		BufferedImage wind = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 		BufferedImage water = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
@@ -58,7 +65,7 @@ public class BiomeDev {
 				color = (a << 24) | (r << 16) | (g << 8) | b;
 				wind.setRGB(i, j, color);
 				
-				c = Math.round((waterMap[i][j]) * 255f);
+				c = Math.round((rivers[i][j]) * 255f);
 				r = c;
 				g = c;
 				b = c;
