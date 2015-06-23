@@ -17,36 +17,89 @@ public class WaterGen {
 		int size = binary.length-1;
 		float[][] moisture = new float[size][size];
 
-		int moistureZone = size/25;
+		int kernelSize = size/20;
 
-		//TODO replace with gaussian kernal on water map with size [mz][mz]
+		if (kernelSize%2==0) kernelSize++;
 
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
 				if (water[i][j] > 0 || binary[i][j] == 0) {
 					moisture[i][j] = 1;
-					for (int dx = -moistureZone; dx < moistureZone; dx++) {
-						for (int dy = -moistureZone; dy < moistureZone; dy++) {
-
-							if (i+dx < size && i+dx >= 0 && j+dy < size && j+dy >=0 && moisture[i+dx][j+dy] != 1) {
-								
-								float scaleX = (moistureZone-Math.abs(dx))/(float)moistureZone;
-								float scaleY = (moistureZone-Math.abs(dy))/(float)moistureZone;
-								
-								float scale = Math.min(scaleX, scaleY);
-								
-								moisture[i+dx][j+dy] = Math.max(scale, moisture[i+dx][j+dy]);
-							}
-						}
-
-					}
-				}					
+				}
 			}
 		}
 
+		int repititions = 3;
+
+		for (int k = 0; k < repititions; k++) {
+			int numBlurs = 5;
+			for (int i = 0; i < numBlurs; i++) {
+				moisture= blur(moisture, size, kernelSize/(i+1));
+			}
+		}
+		
+		
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				if (water[i][j] > 0 || binary[i][j] == 0) {
+					moisture[i][j] = 1;
+				}
+			}
+		}
+		
+	//	moisture= blur(moisture, size, kernelSize, 6);
+
+		
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				if (water[i][j] > 0 || binary[i][j] == 0) {
+					moisture[i][j] = 1;
+				}
+			}
+		}
+		
 		return moisture;
 	}
 
+
+	private float[][] blur(float[][] moisture, int size, int kernelSize) {
+		return blur(moisture, size, kernelSize, 1);
+	}
+	private float[][] blur(float[][] moisture, int size, int kernelSize, float scale) {
+		float[][] newMoisture = new float[size][size];
+
+		if (kernelSize%2 ==0) kernelSize++;
+
+
+		float[][] kernel = new float[kernelSize][kernelSize];
+		float sigma = 6*kernelSize*scale;
+
+		//build the gaussian kernel
+		for (int i = 0; i < kernelSize; i++) {
+			for (int j = 0; j < kernelSize; j++) {
+				int dx = Math.abs(2*(i-(kernelSize/2))); int dy = Math.abs(2*(j-(kernelSize/2)));
+				float val = (float)(1f/Math.sqrt(2*Math.PI*sigma*sigma)*Math.exp(((dx*dx)+(dy*dy))/(-2*sigma*sigma)));				
+				kernel[i][j] = val;
+			}
+		}
+
+
+		float kernelVal = 0;
+
+		for (int i = 0; i < size-kernelSize; i++) {
+			for (int j = 0; j < size-kernelSize; j++) {
+
+				for (int dx= 0; dx < kernelSize; dx++) {
+					for (int dy = 0; dy < kernelSize; dy++) {
+						kernelVal += kernel[dx][dy]*moisture[i+dx][j+dy];
+					}
+				}
+				newMoisture[i+kernelSize/2][j+kernelSize/2] = Math.min(Math.max(kernelVal,0), 0.9f);
+				kernelVal = 0;
+			}
+		}
+		return newMoisture;
+	}
 
 
 	public float[][] generateWater(float[][] heightMap, float[][] binaryMap, float lowThresh) {

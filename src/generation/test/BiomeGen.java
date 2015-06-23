@@ -27,7 +27,7 @@ public class BiomeGen {
 					float wetness = moisture[i][j];
 					if (height < (mtnHeight-minHeight)*1/4f + minHeight) {
 						biomes[i][j] = lowlands(wetness);
-					} else if (height < (mtnHeight-minHeight)*2/4f + minHeight) {
+					} else if (height < (mtnHeight-minHeight)*3/4f + minHeight) {
 						biomes[i][j] = midlands(wetness);
 					} else if (height < mtnHeight) {
 						biomes[i][j] = highlands(wetness);
