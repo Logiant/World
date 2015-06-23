@@ -169,7 +169,6 @@ public class WaterGen {
 						}
 					}
 					minMax = Math.min(min, h); //get new minMax
-					System.out.println(minMax);
 					maxHeights[mini] = h;
 					highestPts.set(mini, new Coordinate(i, j));
 				}

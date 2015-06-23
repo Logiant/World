@@ -16,7 +16,7 @@ public class BiomeGen {
 	}
 
 
-	public BIOME[][] createBiomes(float[][] heightmap, float[][] binary, float[][] moisture) {
+	public BIOME[][] createBiomes(float[][] heightmap, float[][] binary, float[][] moisture, float minHeight, float mtnHeight) {
 		int size = moisture.length;
 		BIOME[][] biomes = new BIOME[size][size];
 
@@ -25,11 +25,11 @@ public class BiomeGen {
 				if (binary[i][j] > 0 && moisture[i][j] < 1) { //not water
 					float height = heightmap[i][j];
 					float wetness = moisture[i][j];
-					if (height < 1/4f) {
+					if (height < (mtnHeight-minHeight)*1/4f + minHeight) {
 						biomes[i][j] = lowlands(wetness);
-					} else if (height < 2/4f) {
+					} else if (height < (mtnHeight-minHeight)*2/4f + minHeight) {
 						biomes[i][j] = midlands(wetness);
-					} else if (height < 3/4f) {
+					} else if (height < mtnHeight) {
 						biomes[i][j] = highlands(wetness);
 					} else {
 						biomes[i][j] = mountains(wetness);

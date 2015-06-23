@@ -1,4 +1,4 @@
-package world;
+package world.voxels;
 
 import util.Vector3;
 
@@ -12,7 +12,7 @@ public class Voxel {
 	public float[] colors;
 	public int[] indices;
 	
-	public boolean hidden;
+	protected boolean hidden;
 	
 	public Voxel(float size) {
 		verts = new float[] {//X, 	Y, 		Z,		 W
@@ -89,6 +89,14 @@ public class Voxel {
 //	public void color(Vector3 color) {
 //		
 //	}
+	
+	public void setVisible(boolean visible) {
+		hidden = !visible;
+	}
+	
+	public boolean isVisible() {
+		return !hidden;
+	}
 	
 	public void indexOffset(int amt) {
 		for (int i = 0; i < indices.length; i++) {

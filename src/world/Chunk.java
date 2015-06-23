@@ -3,7 +3,11 @@ package world;
 import lwjgl3Test.VBORender;
 import util.ArrayHelper;
 import util.Vector3;
+import world.voxels.Voxel;
+import world.voxels.WoodVoxel;
 import generation.World;
+import generation.biomes.BIOME;
+import generation.biomes.BiomeToVoxel;
 
 public class Chunk {
 	public static final int CHUNK_WIDTH = 16;
@@ -26,9 +30,11 @@ public class Chunk {
 		dzc = dz * World.VOXEL_SIZE;
 	}
 
-	public void Build(int[][] map, VBORender graphics) {
+	public void Build(int[][] map, BIOME[][] biomes, VBORender graphics) {
 		int[] maxPos = {0, 0};
 		int maxHeight = 0;
+
+		
 		world = new Voxel[CHUNK_WIDTH][CHUNK_DEPTH][CHUNK_HEIGHT];
 		for (int i = 0; i < CHUNK_WIDTH; i++) {
 			for (int j = 0; j < CHUNK_DEPTH; j++) {
@@ -38,23 +44,17 @@ public class Chunk {
 					maxPos[0] = i; maxPos[1] = j;
 				}
 				for (int h = 0; h < CHUNK_HEIGHT; h++) {
-					if (zoneHeight == 0) {
-						world[i][j][h] = new WaterVoxel(World.VOXEL_SIZE);
-					} else if (zoneHeight < 0.1*20) {
-						world[i][j][h] = new SandVoxel(World.VOXEL_SIZE);
-					} else if (zoneHeight >= 0.6*20) {
-						world[i][j][h] = new MountainVoxel(World.VOXEL_SIZE);
-					} else {world[i][j][h] = new Voxel(World.VOXEL_SIZE);}
-
+					world[i][j][h] = BiomeToVoxel.getVoxel(biomes[i+dx][j+dz], World.VOXEL_SIZE);
+					
 					world[i][j][h].translate(new Vector3(i*World.VOXEL_SIZE + dxc, h*World.VOXEL_SIZE, j*World.VOXEL_SIZE + dzc));
-					world[i][j][h].hidden = true;
+					world[i][j][h].setVisible(false);
 					numVoxels ++;
-					if (h == zoneHeight || (h == CHUNK_HEIGHT && h == zoneHeight) 
+					if (h == zoneHeight || (h == (CHUNK_HEIGHT-1) && h < zoneHeight) 
 							|| (h < zoneHeight && map[dx+Math.abs(i-1)%map.length][dz+j] < h)
 							|| (h <= zoneHeight && map[dx+(i+1)%map.length][dz+j] < h)
 							|| (h <= zoneHeight && map[dx+i][Math.abs(dz+j-1)%map.length] < h)
 							|| (h <= zoneHeight && map[dx+i][(dz+j+1)%map.length] < h)) {
-						world[i][j][h].hidden = false;
+						world[i][j][h].setVisible(true);
 					}
 				}
 			}
@@ -108,7 +108,7 @@ public class Chunk {
 			System.out.println(x + ", " + y + " " + z);
 			world[xi][yi][zi] = new WoodVoxel(World.VOXEL_SIZE);
 			world[xi][yi][zi].translate(new Vector3(x*World.VOXEL_SIZE + dxc, y*World.VOXEL_SIZE, z*World.VOXEL_SIZE + dzc));
-			world[xi][yi][zi].hidden = false;
+			world[xi][yi][zi].setVisible(true);
 		}
 
 
@@ -119,7 +119,7 @@ public class Chunk {
 		for (int i = 0; i < CHUNK_WIDTH; i++) {
 			for (int j = 0; j < CHUNK_DEPTH; j++) {
 				for (int h = 0; h < CHUNK_HEIGHT; h++) {
-					if (!world[i][j][h].hidden) {
+					if (world[i][j][h].isVisible()) {
 						verts = ArrayHelper.CopyArray(verts, world[i][j][h].verts);
 					}
 				}
@@ -133,7 +133,7 @@ public class Chunk {
 		for (int i = 0; i < CHUNK_WIDTH; i++) {
 			for (int j = 0; j < CHUNK_DEPTH; j++) {
 				for (int h = 0; h < CHUNK_HEIGHT; h++) {
-					if (!world[i][j][h].hidden) {
+					if (world[i][j][h].isVisible()) {
 						cols = ArrayHelper.CopyArray(cols, world[i][j][h].colors);
 					}
 				}
@@ -148,7 +148,7 @@ public class Chunk {
 		for (int i = 0; i < CHUNK_WIDTH; i++) {
 			for (int j = 0; j < CHUNK_DEPTH; j++) {
 				for (int h = 0; h < CHUNK_HEIGHT; h++) {
-					if (!world[i][j][h].hidden) {
+					if (world[i][j][h].isVisible()) {
 						world[i][j][h].indexOffset(offset);
 						inds = ArrayHelper.CopyArray(inds, world[i][j][h].indices);
 						offset += 8;

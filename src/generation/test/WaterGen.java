@@ -19,6 +19,7 @@ public class WaterGen {
 
 		int moistureZone = size/25;
 
+		//TODO replace with gaussian kernal on water map with size [mz][mz]
 
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
@@ -65,7 +66,7 @@ public class WaterGen {
 			}
 		}
 
-		int numRivers = (size/20);
+		int numRivers = (int)(Math.sqrt(size)/2);
 		for (int i = 0; i < numRivers; i++) {
 			int index = rGen.nextInt(highPoints.size());
 			int[] pos = highPoints.get(index);

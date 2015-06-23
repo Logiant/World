@@ -1,4 +1,4 @@
-package world;
+package world.voxels;
 
 public class MountainVoxel extends Voxel {
 

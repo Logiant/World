@@ -29,23 +29,82 @@ public class GenTest2 {
 	WaterGen waterGen;
 	BiomeGen biomeGen;
 
+	
+	float[][] heightmap;
+	BIOME[][] biomes;
+	
+	public float[][] getMap() {
+		return heightmap;
+	}
+	
+	public BIOME[][] getBiomes() {
+		return biomes;
+	}
+	
+	
+	public float getMountainThresh() {
+		return heightGen.mtnThresh;
+	}
+	
+	public float getWaterThresh() {
+		return heightGen.waterThresh;
+	}
+	
+	
 	public GenTest2() throws IOException {
 		setupVars();
 
 		//generate desired maps
-		float[][] heightmap = heightGen.generateHeightmap(size+1);
+		System.out.println("Generating heightmap...");
+		long startTime = System.nanoTime();
+		heightmap = heightGen.generateHeightmap(size+1);
+		float dt = Math.round((System.nanoTime() - startTime)/1000000000f * 10000)/10000;
+		System.out.println("Complete after " + dt + " seconds\n");
+		startTime = System.nanoTime();
+		
+		System.out.println("Generating Binary Map...");
 		float[][] binary = heightGen.binaryMap;
+		dt = Math.round((System.nanoTime() - startTime)/1000000000f * 100)/100;
+		System.out.println("Complete after " + dt + " seconds\n");
+		startTime = System.nanoTime();
+		
+		System.out.println("Coloring Map...");
 		float[][][] colored = colorGen.color(heightmap, binary);
+		dt = Math.round((System.nanoTime() - startTime)/1000000000f * 100)/100;
+		System.out.println("Complete after " + dt + " seconds\n");
+		startTime = System.nanoTime();
+		
+		System.out.println("Flowing Rivers...");
 		float[][] water = waterGen.generateWater(heightmap, binary, (heightGen.mtnThresh + heightGen.waterThresh)/2f);
+		dt = Math.round((System.nanoTime() - startTime)/1000000000f * 100)/100;
+		System.out.println("Complete after " + dt + " seconds\n");
+		startTime = System.nanoTime();
+		
+		System.out.println("Generating Moisture...");
 		float[][] moisture = waterGen.moistureMap(binary, water);
-		BIOME[][] biomes = biomeGen.createBiomes(heightmap, binary, moisture);
-
+		dt = Math.round((System.nanoTime() - startTime)/1000000000f * 100)/100;
+		System.out.println("Complete after " + dt + " seconds\n");
+		startTime = System.nanoTime();
+		
+		System.out.println("Building biomes...");
+		biomes = biomeGen.createBiomes(heightmap, binary, moisture, heightGen.waterThresh, heightGen.mtnThresh);
+		dt = Math.round((System.nanoTime() - startTime)/1000000000f * 100)/100;
+		System.out.println("Complete after " + dt + " seconds\n");
+		startTime = System.nanoTime();
+		
+		System.out.println("Generating image data...");
+		
+		
 		//create images
 		int a = 255; //transparency
 
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
 
+				if (heightmap[i][j] < heightGen.waterThresh) {
+					heightmap[i][j] = heightGen.waterThresh;
+				}
+				
 				float val = heightmap[i][j]*binary[i][j];
 
 				int r = (int)(val*255 + 0.5f);
@@ -156,6 +215,8 @@ public class GenTest2 {
 			}
 		}
 
+		System.out.println("Writing .png Files...");
+		
 		ImageIO.write(heightImage, "png", new File(directory, "Heightmap.png"));
 		ImageIO.write(binaryImage, "png", new File(directory, "Binary.png"));
 		ImageIO.write(sortedImage, "png", new File(directory, "Sorted.png"));
@@ -164,7 +225,7 @@ public class GenTest2 {
 		ImageIO.write(moistureImage, "png", new File(directory, "Moisture.png"));
 		ImageIO.write(biomeImage, "png", new File(directory, "Biomes.png"));
 
-
+		System.out.println("Generation Complete!");
 	}
 
 
