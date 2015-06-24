@@ -144,7 +144,9 @@ public class VBORender {
 		return shaderID;
 	}
 
+	//TODO update position in shader using a mat4 transform!
 	public void updateVerts(int vaoId, int vboId, float[] verts) {
+		System.out.println("Updating Verts...");
 		FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(verts.length);
 		verticesBuffer.put(verts);
 		verticesBuffer.flip();
@@ -152,7 +154,7 @@ public class VBORender {
 		GL30.glBindVertexArray(vaoId);
 		
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
-		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, verticesBuffer, GL15.GL_STATIC_DRAW);
+		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, verts.length, verticesBuffer);
 		GL20.glVertexAttribPointer(0, 4, GL11.GL_FLOAT, false, 0, 0);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		
