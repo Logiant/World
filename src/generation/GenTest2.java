@@ -1,4 +1,4 @@
-package generation.test;
+package generation;
 
 import generation.biomes.BIOME;
 
@@ -10,6 +10,7 @@ import javax.imageio.ImageIO;
 
 public class GenTest2 {
 
+	long seed = System.nanoTime();
 
 	BufferedImage heightImage;
 	BufferedImage binaryImage;
@@ -22,7 +23,7 @@ public class GenTest2 {
 
 	String directory;
 
-	int size = 1024; //bufferedimage size
+	int size = 64; //bufferedimage size
 
 	Heightmap heightGen;
 	ColorGen colorGen;
@@ -231,7 +232,6 @@ public class GenTest2 {
 
 	void setupVars() {
 		//seeds and generations
-		long seed = System.nanoTime();
 		heightGen = new Heightmap(seed);
 		colorGen = new ColorGen(seed);
 		waterGen = new WaterGen(seed);
@@ -258,5 +258,9 @@ public class GenTest2 {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public long getSeed() {
+		return seed;
 	}
 }

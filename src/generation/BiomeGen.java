@@ -1,4 +1,4 @@
-package generation.test;
+package generation;
 
 import generation.biomes.BIOME;
 

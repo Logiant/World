@@ -1,4 +1,4 @@
-package lwjgl3Test;
+package main;
 
 import org.lwjgl.Sys;
 import org.lwjgl.glfw.*;
@@ -107,7 +107,7 @@ public class MainGame {
         game.initialize(window);
         glClearColor(135/255f,	206/255f,	250/255f,1);
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
+//		glEnable(GL_CULL_FACE);
         
     }
 

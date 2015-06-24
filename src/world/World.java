@@ -1,27 +1,29 @@
-package generation;
+package world;
 
 import java.io.IOException;
+import java.util.Random;
 
-import generation.test.GenTest2;
-import lwjgl3Test.VBORender;
+import generation.GenTest2;
+import main.VBORender;
 import util.ArrayHelper;
-import world.Chunk;
+import util.Vector3;
 
 public class World {
 
 	int width = 5;
 	int height = 5;
-	
-	long seed = 5;
-	
+
 	public static int VOXEL_SIZE = 2;
-	
+
+	Random rGen;
+
 	Chunk[][] chunk;
 	float[][] map;
 	GenTest2 gen;
 	VBORender graphics;
-	
+
 	public void Build(VBORender graphics) {
+
 		this.graphics = graphics;
 		try {
 			gen = new GenTest2();
@@ -30,6 +32,7 @@ public class World {
 			e.printStackTrace();
 		}
 		map = gen.getMap();
+		rGen = new Random(gen.getSeed());
 		width = map.length / Chunk.CHUNK_WIDTH; height = map.length / Chunk.CHUNK_DEPTH;
 		int[][] world = new int[map.length][map[0].length];
 		for (int i = 0; i < world.length; i++) {
@@ -46,15 +49,15 @@ public class World {
 			}
 		}
 	}
-	
-	
+
+
 	public void render() {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
 				chunk[i][j].draw(graphics);
 			}
 		}	}
-	
+
 	public float[] getVerts() {
 		float[] verts = new float[0];
 		for (int i = 0; i < width; i++) {
@@ -64,7 +67,7 @@ public class World {
 		}
 		return verts;
 	}
-	
+
 	public float[] getColors() {
 		float[] colors = new float[0];
 		for (int i = 0; i < width; i++) {
@@ -83,5 +86,18 @@ public class World {
 			}
 		}
 		return inds;
+	}
+
+
+	public Vector3 getLand() {
+		int x = rGen.nextInt(map.length); int z = rGen.nextInt(map.length);
+		float y = map[x][z];
+
+		while (y <= gen.getWaterThresh()) {
+			x = rGen.nextInt(map.length); z = rGen.nextInt(map.length);
+			y = map[x][z];
+		}
+
+		return new Vector3(VOXEL_SIZE*x, VOXEL_SIZE*y*Chunk.CHUNK_HEIGHT + 2*VOXEL_SIZE,VOXEL_SIZE*z);
 	}
 }

@@ -1,11 +1,10 @@
 package world;
 
-import lwjgl3Test.VBORender;
+import main.VBORender;
 import util.ArrayHelper;
 import util.Vector3;
 import world.voxels.Voxel;
 import world.voxels.WoodVoxel;
-import generation.World;
 import generation.biomes.BIOME;
 import generation.biomes.BiomeToVoxel;
 
@@ -64,7 +63,8 @@ public class Chunk {
 	//		buildHouse(xMax, yMax, zMax, world);
 
 		}
-		drawId = graphics.createVBO(getVerts(), getColors(), getIndices());
+		int[] drawData = graphics.createVBO(getVerts(), getColors(), getIndices());
+		drawId = drawData[0];
 		indicesCount = getIndices().length;
 	}
 

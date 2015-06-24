@@ -1,4 +1,4 @@
-package generation.test;
+package generation;
 
 import java.util.*;
 
@@ -17,7 +17,10 @@ public class WaterGen {
 		int size = binary.length-1;
 		float[][] moisture = new float[size][size];
 
-		int kernelSize = size/20;
+		float[][] intenseMoisture = new float[size][size];
+
+		int kernelSize = (int)Math.sqrt(size);
+
 
 		if (kernelSize%2==0) kernelSize++;
 
@@ -25,61 +28,54 @@ public class WaterGen {
 			for (int j = 0; j < size; j++) {
 				if (water[i][j] > 0 || binary[i][j] == 0) {
 					moisture[i][j] = 1;
+					intenseMoisture[i][j] = 1;
 				}
 			}
 		}
 
-		int repititions = 3;
-
-		for (int k = 0; k < repititions; k++) {
-			int numBlurs = 5;
-			for (int i = 0; i < numBlurs; i++) {
-				moisture= blur(moisture, size, kernelSize/(i+1));
-			}
+		float avgWet = blur(moisture, size, kernelSize, 2);
+		float oldWet = 0;
+		while (avgWet < 0.8 && avgWet != oldWet) {
+			oldWet = avgWet;
+			avgWet= blur(moisture, size, kernelSize, 2);
+			System.out.println(avgWet);
 		}
+
+		blur(moisture, size, kernelSize, 0.5f);
 		
 		
+		blur(intenseMoisture, size, kernelSize, 2);
+
+
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
 				if (water[i][j] > 0 || binary[i][j] == 0) {
 					moisture[i][j] = 1;
+				} else {
+					moisture[i][j] = Math.min(intenseMoisture[i][j]+(moisture[i][j]/2), 0.95f);
 				}
 			}
 		}
-		
-	//	moisture= blur(moisture, size, kernelSize, 6);
 
-		
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				if (water[i][j] > 0 || binary[i][j] == 0) {
-					moisture[i][j] = 1;
-				}
-			}
-		}
-		
 		return moisture;
 	}
 
 
-	private float[][] blur(float[][] moisture, int size, int kernelSize) {
-		return blur(moisture, size, kernelSize, 1);
-	}
-	private float[][] blur(float[][] moisture, int size, int kernelSize, float scale) {
+	private float blur(float[][] moisture, int size, int kernelSize, float scale) {
 		float[][] newMoisture = new float[size][size];
 
 		if (kernelSize%2 ==0) kernelSize++;
 
 
 		float[][] kernel = new float[kernelSize][kernelSize];
-		float sigma = 6*kernelSize*scale;
+		float sigma = kernelSize;
 
 		//build the gaussian kernel
 		for (int i = 0; i < kernelSize; i++) {
 			for (int j = 0; j < kernelSize; j++) {
 				int dx = Math.abs(2*(i-(kernelSize/2))); int dy = Math.abs(2*(j-(kernelSize/2)));
 				float val = (float)(1f/Math.sqrt(2*Math.PI*sigma*sigma)*Math.exp(((dx*dx)+(dy*dy))/(-2*sigma*sigma)));				
-				kernel[i][j] = val;
+				kernel[i][j] = val*scale;
 			}
 		}
 
@@ -98,7 +94,17 @@ public class WaterGen {
 				kernelVal = 0;
 			}
 		}
-		return newMoisture;
+
+		float sum = 0;
+
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				moisture[i][j] = newMoisture[i][j];
+				sum += moisture[i][j];
+			}
+		}
+
+		return sum/(size*size);
 	}
 
 
@@ -143,10 +149,18 @@ public class WaterGen {
 
 			Node end = trickle(heightMap, binary, x, y, waterMap);
 
-			while (end.parent != null) {
+			int index =0;
+
+			while (end.parent != null && index < 2500) {
 				waterMap[end.x][end.y] += 0.1f;
 				end = end.parent;
+				index++;
 			}
+			System.out.println("reached " + index + " flowing");
+			if (index >= 2500) {
+				System.err.println("RIVER OVERFLOW");
+			}
+
 
 		}
 	}

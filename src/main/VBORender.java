@@ -1,4 +1,4 @@
-package lwjgl3Test;
+package main;
 
 import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
 
@@ -31,7 +31,7 @@ public class VBORender {
 		GL20.glUseProgram(pId);
 	}
 	
-	public int createVBO(float[] vertices, float[] colors, int[] indices) {
+	public int[] createVBO(float[] vertices, float[] colors, int[] indices) {
 		//create the buffers to hold vertex color and index data
 		FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(vertices.length);
 		verticesBuffer.put(vertices);
@@ -71,8 +71,8 @@ public class VBORender {
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboiId);
 		// Deselect (bind to 0) the VAO
 		GL30.glBindVertexArray(0);
-		
-		return vaoId;
+		int[] data = {vaoId, vboId, vbocId, vboiId};
+		return data;
 	}
 
 	public void update(Matrix4 transform) {
@@ -142,5 +142,20 @@ public class VBORender {
 		GL20.glCompileShader(shaderID);
 
 		return shaderID;
+	}
+
+	public void updateVerts(int vaoId, int vboId, float[] verts) {
+		FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(verts.length);
+		verticesBuffer.put(verts);
+		verticesBuffer.flip();
+		
+		GL30.glBindVertexArray(vaoId);
+		
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
+		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, verticesBuffer, GL15.GL_STATIC_DRAW);
+		GL20.glVertexAttribPointer(0, 4, GL11.GL_FLOAT, false, 0, 0);
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+		
+		GL30.glBindVertexArray(0);
 	}
 }
