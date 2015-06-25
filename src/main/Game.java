@@ -1,6 +1,8 @@
 package main;
 
 import entities.player.Player;
+import util.Quaternion;
+import util.Vector3;
 import world.World;
 
 public class Game {
@@ -24,19 +26,29 @@ public class Game {
 		graphics.initialize();
 
 		world.Build(graphics);
-	//	p.setPosition(world.getLand());
+		p.setPosition(world.getLand());
 		p.initialize(graphics);
 	}
 
 	public void update() {
 		p.update();
+		physics();
 		cam.update();
 
+		
+		
 		graphics.update(cam.getView());
+		graphics.transform(new Vector3(), new Quaternion()); //undo all transformation
 		render();
 	}
 
-	public void render() {
+	
+	private void physics() {
+		p.simpleGravity(world);
+	}
+	
+	
+	private void render() {
 		world.render();
 		p.draw();
 	}

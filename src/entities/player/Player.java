@@ -1,10 +1,11 @@
 package entities.player;
 
 
-import main.Camera;
 import main.VBORender;
 import util.Matrix4;
+import util.Time;
 import util.Vector3;
+import world.World;
 import entities.Transform;
 
 
@@ -13,14 +14,16 @@ public class Player {
 	public Transform transform;
 
 	long window;
-	
+
+	float gravity = -0.01f;
+
 	VBORender graphics;
 	int drawId; int vertId; int indicesCount;
 	Matrix4 viewMatrix;
-	
-	
+
+
 	float[] verts; float[] colors; int[] indices;
-	float size = 4;
+	float size = 2;
 	float speed;
 
 
@@ -28,23 +31,23 @@ public class Player {
 		this.window = window; this.speed = speed;
 		transform = new Transform();
 		verts = new float[] {//X, 	Y, 		Z,		 W
-				0, 		0, 		0,		 1, //near LL - 0
-				size, 	0, 		0,		 1, //near LR - 1
-				0, 		size, 	0,		 1, //near UL - 2
-				size, 	size, 	0,		 1, //near UR - 3
-				0, 		0, 		size,	 1, //far LL  - 4
-				size,	0, 		size,	 1, // far LR - 5
-				0, 		size,	size,	 1, // far UL - 6
-				size,	size,	size,	 1}; //far UR - 7
+				-size/2, -size/2,  -size/2,	 1, //near LL - 0
+				size/2,  -size/2,  -size/2,  1, //near LR - 1
+				-size/2,  size/2,  -size/2,	 1, //near UL - 2
+				size/2,   size/2,  -size/2,	 1, //near UR - 3
+				-size/2, -size/2,	size/2,	 1, //far LL  - 4
+				size/2,	 -size/2,	size/2,	 1, // far LR - 5
+				-size/2,  size/2,	size/2,	 1, // far UL - 6
+				size/2,	  size/2,	size/2,	 1}; //far UR - 7
 		colors = new float[] {//R, 		  G, 	   B,	   A
-							255/255f,	255/255f, 255/255f,1, //near LL
-							255/255f,	255/255f, 255/255f,1, //near LR
-							255/255f,	255/255f, 255/255f,1, //near UL
-							255/255f,	255/255f, 255/255f,1, //near UR
-							255/255f,	255/255f, 255/255f,1, //far LL
-							255/255f,	255/255f, 255/255f,1, //far LR
-							255/255f,	255/255f, 255/255f,1, //far UL
-							255/255f,	255/255f, 255/255f,1,};//far UR
+				255/255f,	255/255f, 255/255f,1, //near LL
+				255/255f,	255/255f, 255/255f,1, //near LR
+				255/255f,	255/255f, 255/255f,1, //near UL
+				255/255f,	255/255f, 255/255f,1, //near UR
+				255/255f,	255/255f, 255/255f,1, //far LL
+				255/255f,	255/255f, 255/255f,1, //far LR
+				255/255f,	255/255f, 255/255f,1, //far UL
+				255/255f,	255/255f, 255/255f,1,};//far UR
 
 		indices = new int[] {
 				1, 0, 2, //near lower
@@ -71,13 +74,49 @@ public class Player {
 		indicesCount = indices.length;
 	}
 
+	public void setPosition(Vector3 pos) {
+		transform.position = pos;
+	}
 
-	public void draw() {
+
+	public void simpleGravity(World world) {
+		Vector3 pos = new Vector3(transform.position);
+
+		float h = world.sampleHeight(pos) + World.VOXEL_SIZE/2f;
+		pos.x -= size/2; pos.z -= size/2;
+
+		h = Math.max(world.sampleHeight(pos) + World.VOXEL_SIZE/2f, h);
+		pos.x += size;
+
+		h = Math.max(world.sampleHeight(pos) + World.VOXEL_SIZE/2f, h);
+		pos.z += size;
+
+		h = Math.max(world.sampleHeight(pos) + World.VOXEL_SIZE/2f, h);
+		pos.x -= size;
+
+		h = Math.max(world.sampleHeight(pos) + World.VOXEL_SIZE/2f, h);
+
+
+		float dy = -(transform.position.y - h - size/2f);
+
+
+
+		if (dy < 0) { //falling
+			dy = Math.max(dy, gravity*Time.dt); //select smallest magnitude
+			transform.position.y += dy;
+		} else{// if (dy <= World.VOXEL_SIZE) {
+			dy = Math.min(dy, Time.dt*(0.01f)); //select smallest magnitude
+			transform.position.y += dy;
+		}
+		
 		
 
-		
-		
-		graphics.updateVerts(drawId, vertId, verts);
+	}
+
+
+
+	public void draw() {		
+		graphics.transform(transform.position, transform.getQuaternion());
 		graphics.render(drawId, indicesCount);
 	}
 

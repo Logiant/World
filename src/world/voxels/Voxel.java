@@ -8,22 +8,41 @@ enum Face {
 
 public class Voxel {
 	
+	public static float sq2 = (float)Math.sqrt(2)/2f;
+	
 	public float[] verts;
 	public float[] colors;
 	public int[] indices;
+	
+	public float[] norms;
 	
 	protected boolean hidden;
 	
 	public Voxel(float size) {
 		verts = new float[] {//X, 	Y, 		Z,		 W
-							0, 		0, 		0,		 1, //near LL - 0
-							size, 	0, 		0,		 1, //near LR - 1
-							0, 		size, 	0,		 1, //near UL - 2
-							size, 	size, 	0,		 1, //near UR - 3
-							0, 		0, 		size,	 1, //far LL  - 4
-							size,	0, 		size,	 1, // far LR - 5
-							0, 		size,	size,	 1, // far UL - 6
-							size,	size,	size,	 1}; //far UR - 7
+							0, 		0,  	0,		1, //near LL - 0
+							size,   0,  	0,  	1, //near LR - 1
+							0,  	size,  	0,	 	1, //near UL - 2
+							size,   size,  	0,	 	1, //near UR - 3
+							0, 		0,		size,	1, //far LL  - 4
+							size,	0,		size,	1, // far LR - 5
+							0,  	size,	size,	1, // far UL - 6
+							size,	size,	size,	1}; //far UR - 7
+		
+
+		
+		norms = new float[] {//X, 	Y, 		Z
+							0, 		0,  	0, //near LL - 0
+							sq2,    0,  	0, //near LR - 1
+							0,  	sq2,  	0, //near UL - 2
+							sq2,    sq2,  	0, //near UR - 3
+							0, 		0,		sq2, //far LL  - 4
+							sq2,	0,		sq2, // far LR - 5
+							0,  	sq2,	sq2, // far UL - 6
+							sq2,	sq2,	sq2}; //far UR - 7
+
+		
+		
 		colors = new float[] {//R, 		  G, 	   B,	   A
 								85/255f,	107/255f,	47/255f,1, //near LL
 								85/255f,	107/255f,	47/255f,1, //near LR

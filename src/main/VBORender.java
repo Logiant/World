@@ -13,8 +13,11 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL32;
 
 import util.Matrix4;
+import util.Quaternion;
+import util.Vector3;
 
 public class VBORender {
 
@@ -22,6 +25,7 @@ public class VBORender {
 
 	//shader values
 	int vsId; //vertex shader
+	int gsId; //geometry shader
 	int fsId; //fragment shader
 	int pId; //shader program id
 
@@ -30,7 +34,7 @@ public class VBORender {
 
 		GL20.glUseProgram(pId);
 	}
-	
+
 	public int[] createVBO(float[] vertices, float[] colors, int[] indices) {
 		//create the buffers to hold vertex color and index data
 		FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(vertices.length);
@@ -99,17 +103,20 @@ public class VBORender {
 		int errorCheckValue = GL11.glGetError();
 		// Load the vertex shader
 		vsId = this.loadShader("Shaders/vertex.glsl", GL20.GL_VERTEX_SHADER);
+		// Load the geometry shader
+		gsId = this.loadShader("Shaders/geometry.glsl", GL32.GL_GEOMETRY_SHADER);
 		// Load the fragment shader
 		fsId = this.loadShader("Shaders/fragment.glsl", GL20.GL_FRAGMENT_SHADER);
 		// Create a new shader program that links both shaders
 		pId = GL20.glCreateProgram();
 		GL20.glAttachShader(pId, vsId);
+		GL20.glAttachShader(pId, gsId);
 		GL20.glAttachShader(pId, fsId);
 		// Position information will be attribute 0
 		GL20.glBindAttribLocation(pId, 0, "in_Position");
 		// Color information will be attribute 1
 		GL20.glBindAttribLocation(pId, 1, "in_Color");
-		
+
 		GL20.glLinkProgram(pId);
 
 		GL20.glValidateProgram(pId);
@@ -144,20 +151,16 @@ public class VBORender {
 		return shaderID;
 	}
 
-	//TODO update position in shader using a mat4 transform!
-	public void updateVerts(int vaoId, int vboId, float[] verts) {
-		System.out.println("Updating Verts...");
-		FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(verts.length);
-		verticesBuffer.put(verts);
-		verticesBuffer.flip();
-		
-		GL30.glBindVertexArray(vaoId);
-		
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
-		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, verts.length, verticesBuffer);
-		GL20.glVertexAttribPointer(0, 4, GL11.GL_FLOAT, false, 0, 0);
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-		
-		GL30.glBindVertexArray(0);
+	//TODO update position in shader using a mat4 t
+	public void transform(Vector3 trans, Quaternion rot) {
+		//bind the shaders
+		//grab the MVP matrix location in the shaders
+		int tLoc = GL20.glGetUniformLocation(pId, "TRAN");
+		int rLoc = GL20.glGetUniformLocation(pId, "QUAT");
+		//load the transform matrix into a float buffer
+		//load the matrix into the program and then unbind it
+		GL20.glUniform4f(tLoc, trans.x, trans.y, trans.z, 0);
+		GL20.glUniform4f(rLoc, rot.x, rot.y, rot.z, rot.w);
+
 	}
 }

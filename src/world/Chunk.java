@@ -18,6 +18,7 @@ public class Chunk {
 
 	int numVoxels;
 	Voxel[][][] world;
+	int[][] height;
 
 	int dx, dz;
 	int dxc, dzc;
@@ -29,10 +30,15 @@ public class Chunk {
 		dzc = dz * World.VOXEL_SIZE;
 	}
 
+	public int[][] getMap() {
+		return height;
+	}
+	
+	
 	public void Build(int[][] map, BIOME[][] biomes, VBORender graphics) {
 		int[] maxPos = {0, 0};
 		int maxHeight = 0;
-
+		height = new int[CHUNK_WIDTH][CHUNK_DEPTH];
 		
 		world = new Voxel[CHUNK_WIDTH][CHUNK_DEPTH][CHUNK_HEIGHT];
 		for (int i = 0; i < CHUNK_WIDTH; i++) {
@@ -54,6 +60,7 @@ public class Chunk {
 							|| (h <= zoneHeight && map[dx+i][Math.abs(dz+j-1)%map.length] < h)
 							|| (h <= zoneHeight && map[dx+i][(dz+j+1)%map.length] < h)) {
 						world[i][j][h].setVisible(true);
+						height[i][j] = h;
 					}
 				}
 			}

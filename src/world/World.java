@@ -34,6 +34,8 @@ public class World {
 		map = gen.getMap();
 		rGen = new Random(gen.getSeed());
 		width = map.length / Chunk.CHUNK_WIDTH; height = map.length / Chunk.CHUNK_DEPTH;
+		System.out.println("# chunks: " + width + ", " + height);
+		System.out.println("MAPSIZE: " + map.length);
 		int[][] world = new int[map.length][map[0].length];
 		for (int i = 0; i < world.length; i++) {
 			for (int j = 0; j < world[0].length; j++) {
@@ -99,5 +101,21 @@ public class World {
 		}
 
 		return new Vector3(VOXEL_SIZE*x, VOXEL_SIZE*y*Chunk.CHUNK_HEIGHT + 2*VOXEL_SIZE,VOXEL_SIZE*z);
+	}
+
+
+	public float sampleHeight(Vector3 position) {
+		int xi = (int)(position.x)/VOXEL_SIZE; int zi = (int)(position.z)/VOXEL_SIZE;	
+		int xc = xi/Chunk.CHUNK_WIDTH; int zc = zi/Chunk.CHUNK_DEPTH;	
+
+				
+		if (xc<width && zc<height && xi >= 0 && zi >= 0) {		
+			int[][] m = chunk[xc][zc].getMap();
+			xc = xi%Chunk.CHUNK_WIDTH;
+			zc = zi%Chunk.CHUNK_DEPTH;			
+			return m[xc][zc]*VOXEL_SIZE + VOXEL_SIZE/2;
+		}
+
+		return Math.round(gen.getWaterThresh()*Chunk.CHUNK_HEIGHT*VOXEL_SIZE);
 	}
 }

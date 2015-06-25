@@ -4,6 +4,7 @@ import input.Keyboard;
 
 import org.lwjgl.glfw.GLFW;
 
+import util.Quaternion;
 import util.Time;
 import util.Vector3;
 
@@ -52,6 +53,11 @@ public class Transform {
 		position.add(Vector3.rotate(linVel, new Vector3(rotation.x, rotation.y, rotation.z)));
 	}
 
+	public Quaternion getQuaternion() {
+		return Quaternion.eulerAngles(rotation.x, rotation.y, rotation.z);
+	}
+	
+	
 	public Vector3 getPosition() {
 		return new Vector3(position);
 	}
