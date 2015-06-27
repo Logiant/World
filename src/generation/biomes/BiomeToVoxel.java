@@ -5,7 +5,7 @@ import world.voxels.*;
 public class BiomeToVoxel {
 
 
-	public static Voxel getVoxel(BIOME b, int voxelSize) {
+	public static Voxel getVoxel(BIOME b, float voxelSize) {
 		Voxel v = null;
 		switch(b) {
 		case OCEAN:

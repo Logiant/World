@@ -23,7 +23,7 @@ public class Player {
 
 
 	float[] verts; float[] colors; int[] indices;
-	float size = 2;
+	float size = 4;
 	float speed;
 
 

@@ -13,7 +13,7 @@ public class World {
 	int width = 5;
 	int height = 5;
 
-	public static int VOXEL_SIZE = 2;
+	public static float VOXEL_SIZE = 1f;
 
 	Random rGen;
 
@@ -105,7 +105,7 @@ public class World {
 
 
 	public float sampleHeight(Vector3 position) {
-		int xi = (int)(position.x)/VOXEL_SIZE; int zi = (int)(position.z)/VOXEL_SIZE;	
+		int xi = (int)(position.x/VOXEL_SIZE); int zi = (int)(position.z/VOXEL_SIZE);	
 		int xc = xi/Chunk.CHUNK_WIDTH; int zc = zi/Chunk.CHUNK_DEPTH;	
 
 				

@@ -17,7 +17,7 @@ public class Game {
 	public void initialize(long window) {
 		this.window = window;
 
-		p = new Player(window, 10);
+		p = new Player(window, 15);
 
 		cam = new Camera(p.transform);
 		world = new World();

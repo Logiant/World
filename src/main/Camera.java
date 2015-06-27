@@ -29,7 +29,7 @@ public class Camera {
 	Transform target;
 
 	
-	Vector3 follow = new Vector3(0, 5, 15);
+	Vector3 follow = new Vector3(0, 10, 30);
 
 	public Camera(Transform target) {
 		position = new Vector3();

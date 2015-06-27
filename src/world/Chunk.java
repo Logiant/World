@@ -26,8 +26,8 @@ public class Chunk {
 	public Chunk(int xPos, int zPos) {
 		dx = xPos * CHUNK_WIDTH;
 		dz = zPos * CHUNK_DEPTH;
-		dxc = dx * World.VOXEL_SIZE;
-		dzc = dz * World.VOXEL_SIZE;
+		dxc = (int)(dx * World.VOXEL_SIZE);
+		dzc = (int)(dz * World.VOXEL_SIZE);
 	}
 
 	public int[][] getMap() {
