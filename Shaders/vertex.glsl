@@ -18,12 +18,12 @@ out VertexData
 
 void main(void) {
 
-	vertex.lightDir = new vec3(-1, -1, 0);
+	vertex.lightDir = vec3(-1, -1, 0);
     
 	vec4 translation = in_Position;
 
 	vec3 temp = cross(QUAT.xyz, translation.xyz) + QUAT.w * translation.xyz;
-    vec4 rotated = new vec4((cross(temp, -QUAT.xyz) + dot(QUAT.xyz,translation.xyz) * QUAT.xyz + QUAT.w * temp), 1) + TRAN;
+    vec4 rotated = vec4((cross(temp, -QUAT.xyz) + dot(QUAT.xyz,translation.xyz) * QUAT.xyz + QUAT.w * temp), 1) + TRAN;
 
 
 
