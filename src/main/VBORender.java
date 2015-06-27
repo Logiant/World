@@ -31,8 +31,19 @@ public class VBORender {
 
 	public void initialize() {
 		shaderSetup();
-
+		int errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR setting up shaders : " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
 		GL20.glUseProgram(pId);
+		errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR using shaders : " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
 	}
 
 	public int[] createVBO(float[] vertices, float[] colors, int[] indices) {
@@ -76,6 +87,14 @@ public class VBORender {
 		// Deselect (bind to 0) the VAO
 		GL30.glBindVertexArray(0);
 		int[] data = {vaoId, vboId, vbocId, vboiId};
+		
+		int errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR creating vbo : " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
+		
 		return data;
 	}
 
@@ -89,14 +108,43 @@ public class VBORender {
 		buffer.flip();
 		//load the matrix into the program and then unbind it
 		GL20.glUniformMatrix4fv(loc, false, buffer);
+		int errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR updating matrix : " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
 	}
 
 	public void render(int vaoId, int indicesCount) {
+		int errorCheckValue = GL11.glGetError();
 		// Bind to the VAO that has all the information about the vertices and colors
 		GL30.glBindVertexArray(vaoId);
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR binding vao : " + checkError(errorCheckValue));
+			System.out.println(vaoId);
+			System.exit(-1);
+		}
 		// Draw the vertices
 		GL11.glDrawElements(GL11.GL_TRIANGLES, indicesCount, GL11.GL_UNSIGNED_INT, 0);
+		
+		errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR rendering : " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
+		
 		GL30.glBindVertexArray(0);
+		
+		errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR unbinding vao : " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
+		
 	}
 
 	private void shaderSetup() {
@@ -112,6 +160,13 @@ public class VBORender {
 		GL20.glAttachShader(pId, vsId);
 		GL20.glAttachShader(pId, gsId);
 		GL20.glAttachShader(pId, fsId);
+		
+		errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("ERROR - Could not create the shaders:" + glGetProgramInfoLog(errorCheckValue));
+			System.exit(-1);
+		}
+		
 		// Position information will be attribute 0
 		GL20.glBindAttribLocation(pId, 0, "in_Position");
 		// Color information will be attribute 1
@@ -120,6 +175,7 @@ public class VBORender {
 		GL20.glLinkProgram(pId);
 
 		GL20.glValidateProgram(pId);
+		
 		errorCheckValue = GL11.glGetError();
 		if (errorCheckValue != GL11.GL_NO_ERROR) {
 			System.out.println("ERROR - Could not create the shaders:" + glGetProgramInfoLog(errorCheckValue));
@@ -147,11 +203,15 @@ public class VBORender {
 		shaderID = GL20.glCreateShader(type);
 		GL20.glShaderSource(shaderID, shaderSource);
 		GL20.glCompileShader(shaderID);
-
+		int errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println(errorCheckValue);
+			System.out.println("ERROR compiling shader: " + glGetProgramInfoLog(errorCheckValue));
+			System.exit(-1);
+		}
 		return shaderID;
 	}
 
-	//TODO update position in shader using a mat4 t
 	public void transform(Vector3 trans, Quaternion rot) {
 		//bind the shaders
 		//grab the MVP matrix location in the shaders
@@ -163,4 +223,28 @@ public class VBORender {
 		GL20.glUniform4f(rLoc, rot.x, rot.y, rot.z, rot.w);
 
 	}
+	
+	
+	
+	private String checkError(int code) {
+		String error = "";
+		switch(code) {
+		default: error = "Unknown"; break;
+		case GL11.GL_NO_ERROR: error = "No Error"; break;
+		case GL11.GL_INVALID_ENUM: error = "Invalid Enum"; break;
+		case GL11.GL_INVALID_VALUE: error = "Invalid Value"; break;
+		case GL11.GL_INVALID_OPERATION: error = "Invalid Operation"; break;
+		case GL11.GL_OUT_OF_MEMORY: error = "Out of Memory"; break;
+		case GL11.GL_STACK_UNDERFLOW: error = "Stack Underflow"; break;
+		case GL11.GL_STACK_OVERFLOW: error = "Stack Overflow"; break;
+			
+		}
+		
+		
+		return error;
+	}
+	
+	
+	
+	
 }
