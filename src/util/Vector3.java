@@ -70,4 +70,8 @@ public class Vector3 {
 		y *= amt;
 		z *= amt;
 	}
+
+	public void sub(Vector3 position) {
+		x -= position.x; y -= position.y; z -= position.z;
+	}
 }

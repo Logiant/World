@@ -37,6 +37,13 @@ public class Camera {
 		this.target = target;
 	}
 	
+	
+	public void move(Transform t) {
+		position.add(t.position);
+		rotation.add(t.rotation);
+		updateView();
+	}
+	
 	public void update() {
 
 		desiredPosition = target.getPosition();
@@ -69,25 +76,63 @@ public class Camera {
 		viewMatrix.translate(position);
 
 		Matrix4 rotationMat = Matrix4.Identity();
-		rotationMat.m00 = (float)Math.cos(-rotation.y*Math.PI/180);
-		rotationMat.m02 = (float)Math.sin(-rotation.y*Math.PI/180);
-		rotationMat.m20 = (float)-Math.sin(-rotation.y*Math.PI/180);
-		rotationMat.m22 = (float)Math.cos(-rotation.y*Math.PI/180);
+		
+		double yTheta = -rotation.y*Math.PI/180;
+		
+		rotationMat.m00 = (float)Math.cos(yTheta);
+		rotationMat.m02 = (float)Math.sin(yTheta);
+		rotationMat.m20 = (float)-Math.sin(yTheta);
+		rotationMat.m22 = (float)Math.cos(yTheta);
 
 		Matrix4.mul(rotationMat, viewMatrix, viewMatrix);
 
 		rotationMat = Matrix4.Identity();
+		double xTheta = -rotation.x*Math.PI/180;
 		rotationMat.m00 = 1;
-		rotationMat.m11 = (float)Math.cos(-rotation.x*Math.PI/180);
-		rotationMat.m12 = (float)-Math.sin(-rotation.x*Math.PI/180);
-		rotationMat.m21 = (float)Math.sin(-rotation.x*Math.PI/180);
-		rotationMat.m22 = (float)Math.cos(-rotation.x*Math.PI/180);
+		rotationMat.m11 = (float)Math.cos(xTheta);
+		rotationMat.m12 = (float)-Math.sin(xTheta);
+		rotationMat.m21 = (float)Math.sin(xTheta);
+		rotationMat.m22 = (float)Math.cos(xTheta);
 
 
 		Matrix4.mul(rotationMat, viewMatrix, viewMatrix);
 	}
+	
+	public Matrix4 genView(Transform t) {
+		
+		Matrix4 viewMatrix = Matrix4.Identity();
+		viewMatrix.translate(new Vector3(t.position.x + position.x, t.position.y+position.y, t.position.z+position.z));
+
+		Matrix4 rotationMat = Matrix4.Identity();
+		
+		double yTheta = -(-t.rotation.y + rotation.y)*Math.PI/180;
+		rotationMat.m00 = (float)Math.cos(yTheta);
+		rotationMat.m02 = (float)Math.sin(yTheta);
+		rotationMat.m20 = (float)-Math.sin(yTheta);
+		rotationMat.m22 = (float)Math.cos(yTheta);
+
+		Matrix4.mul(rotationMat, viewMatrix, viewMatrix);
+
+		rotationMat = Matrix4.Identity();
+		
+		double xTheta = -rotation.x*Math.PI/180;
+		rotationMat.m00 = 1;
+		rotationMat.m11 = (float)Math.cos(xTheta);
+		rotationMat.m12 = (float)-Math.sin(xTheta);
+		rotationMat.m21 = (float)Math.sin(xTheta);
+		rotationMat.m22 = (float)Math.cos(xTheta);
+
+		
+		return Matrix4.mul(Matrix4.perspective(viewAngle, 4f/3, nearClip, farClip), viewMatrix, new Matrix4());
+	}
 
 	public Matrix4 getView() {
 		return Matrix4.mul(Matrix4.perspective(viewAngle, 4f/3, nearClip, farClip), viewMatrix, new Matrix4());
+	}
+
+
+	public void unMove(Transform t) {
+		position.sub(t.position);
+		rotation.sub(t.rotation);		
 	}
 }

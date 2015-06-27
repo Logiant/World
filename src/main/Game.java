@@ -11,7 +11,7 @@ public class Game {
 	VBORender graphics;
 	Camera cam;
 	World world;
-	
+
 	Player p;
 
 	public void initialize(long window) {
@@ -31,25 +31,28 @@ public class Game {
 	}
 
 	public void update() {
+		System.out.println();
+		System.out.println("New Update");
 		p.update();
 		physics();
 		cam.update();
 
-		
-		
-		graphics.update(cam.getView());
+
 		graphics.transform(new Vector3(), new Quaternion()); //undo all transformation
+		graphics.update(cam.getView());
 		render();
 	}
 
-	
+
 	private void physics() {
 		p.simpleGravity(world);
 	}
-	
-	
+
+
 	private void render() {
 		world.render();
+		graphics.transform(p.transform.position, p.transform.getQuaternion());
 		p.draw();
+
 	}
 }

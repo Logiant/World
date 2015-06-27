@@ -1,7 +1,7 @@
 #version 330
 
 uniform mat4 MVP;
-uniform vec4 TRAN;
+uniform vec3 TRAN;
 uniform vec4 QUAT;
 
 in vec4 in_Position;
@@ -18,18 +18,17 @@ out VertexData
 
 void main(void) {
 
-	vertex.lightDir = vec3(-1, -1, 0);
+	//default light direction
+	vertex.lightDir = vec3(1, -1, -1);
     
-	vec4 translation = in_Position;
-
-	vec3 temp = cross(QUAT.xyz, translation.xyz) + QUAT.w * translation.xyz;
-    vec4 rotated = vec4((cross(temp, -QUAT.xyz) + dot(QUAT.xyz,translation.xyz) * QUAT.xyz + QUAT.w * temp), 1) + TRAN;
-
+    //quaternion rotation
+	vec3 temp = 2*cross(QUAT.xyz, in_Position.xyz);
+    vec3 rotated = in_Position.xyz + (QUAT.w*temp) + cross(QUAT.xyz, temp);
 
 
-	gl_Position = MVP * (rotated);
+	//output variables
+	gl_Position = (MVP * (vec4(rotated,1) + vec4(TRAN, 0)));
+	
     vertex.color = in_Color;
-  
-  
   	vertex.rot = mat3(MVP);
 }

@@ -99,6 +99,7 @@ public class VBORender {
 	}
 
 	public void update(Matrix4 transform) {
+		System.out.println("graphics update");
 		//bind the shaders
 		//grab the MVP matrix location in the shaders
 		int loc = GL20.glGetUniformLocation(pId, "MVP");
@@ -213,13 +214,14 @@ public class VBORender {
 	}
 
 	public void transform(Vector3 trans, Quaternion rot) {
+		System.out.println("transform");
 		//bind the shaders
 		//grab the MVP matrix location in the shaders
 		int tLoc = GL20.glGetUniformLocation(pId, "TRAN");
 		int rLoc = GL20.glGetUniformLocation(pId, "QUAT");
 		//load the transform matrix into a float buffer
 		//load the matrix into the program and then unbind it
-		GL20.glUniform4f(tLoc, trans.x, trans.y, trans.z, 0);
+		GL20.glUniform3f(tLoc, trans.x, trans.y, trans.z);
 		GL20.glUniform4f(rLoc, rot.x, rot.y, rot.z, rot.w);
 
 	}

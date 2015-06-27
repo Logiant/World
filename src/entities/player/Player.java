@@ -25,7 +25,7 @@ public class Player {
 	float[] verts; float[] colors; int[] indices;
 	float size = 4;
 	float speed;
-
+	
 
 	public Player(long window, float speed) {
 		this.window = window; this.speed = speed;
