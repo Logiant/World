@@ -21,7 +21,7 @@ public class World {
 	int height = 5;
 
 	int playerX; int playerZ;
-	int renderDist = 15;
+	int renderDist = 20;
 	int loadDist = renderDist + 2; 
 	
 	int checksum = 0;
