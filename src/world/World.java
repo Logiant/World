@@ -1,7 +1,14 @@
 package world;
 
 import java.io.IOException;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
+
+
+
+
 
 
 import generation.GenTest2;
@@ -14,12 +21,17 @@ public class World {
 	int height = 5;
 
 	int playerX; int playerZ;
+	int renderDist = 15;
+	int loadDist = renderDist + 2; 
+	
+	int checksum = 0;
 	
 	public static float VOXEL_SIZE = 1f;
 
 	Random rGen;
 
 	RegionManager[][] regions;
+	Hashtable<String, RegionManager> lookup = new Hashtable<String, RegionManager>();
 
 	float[][] map;
 	GenTest2 gen;
@@ -57,13 +69,46 @@ public class World {
 		}
 	}
 
+	
+	public void update(Vector3 center, VBORender g) {
+		checksum = (checksum + 1) % 150;
+		sampleHeight(center); //set player pos
+		
+		for (int i = playerX-loadDist; i <= playerX+loadDist; i++) {
+			for (int j = playerZ-renderDist; j <= playerZ+renderDist; j++) {
+				if (i >= 0 && j >= 0 && i < width && j < height) {
+				//check if a region is loaded
+					if (!lookup.containsKey(getKey(i, j))) {
+						lookup.put(getKey(i,j), regions[i][j]);
+						lookup.get(getKey(i,j)).checksum = checksum;
+						lookup.get(getKey(i,j)).createVAO(g);
+					} else {
+						lookup.get(getKey(i,j)).checksum = checksum;
+					}
+				}
+			}
+		}	
+		
+		//for everything in the table
+		List<RegionManager> toRemove = new LinkedList<RegionManager>();
+		for (RegionManager r:lookup.values()) {
+			if (r.checksum != checksum) {
+				//if their checksum doesn't match destroy the vbo and remove the key
+				r.destroyVAO(g);
+				toRemove.add(r);
+			}
+		}
+		for (RegionManager r:toRemove) {
+			lookup.remove(getKey(r.xi,r.yi));
+		}
+	}
+	
 
 	public void render() {
 		
-		int dx = 50; int dz = 50;
 		
-		for (int i = playerX-dx; i <= playerX+dx; i++) {
-			for (int j = playerZ-dz; j <= playerZ+dz; j++) {
+		for (int i = playerX-renderDist; i <= playerX+renderDist; i++) {
+			for (int j = playerZ-renderDist; j <= playerZ+renderDist; j++) {
 				if (i >= 0 && j >= 0 && i < width && j < height)
 					regions[i][j].draw(graphics);
 			}
@@ -80,8 +125,7 @@ public class World {
 			x = rGen.nextInt(map.length); z = rGen.nextInt(map.length);
 			y = map[x][z];
 		}
-
-		return new Vector3(VOXEL_SIZE*x, VOXEL_SIZE*y*Chunk.CHUNK_HEIGHT + 2*VOXEL_SIZE,VOXEL_SIZE*z);
+		return new Vector3(VOXEL_SIZE*x*Chunk.CHUNK_WIDTH, VOXEL_SIZE*y*Chunk.CHUNK_HEIGHT + 2*VOXEL_SIZE,VOXEL_SIZE*z*Chunk.CHUNK_DEPTH);
 	}
 
 
@@ -91,7 +135,6 @@ public class World {
 		
 		int xInR = xV%(RegionManager.NUM_CHUNKS*Chunk.CHUNK_WIDTH); int zInR = zV%(RegionManager.NUM_CHUNKS*Chunk.CHUNK_DEPTH);
 	
-		System.out.println(xR + ", " + zR);
 		playerX = xR; playerZ = zR;
 
 		
@@ -107,4 +150,10 @@ public class World {
 
 		return Math.round(gen.getWaterThresh()*Chunk.CHUNK_HEIGHT*VOXEL_SIZE + VOXEL_SIZE/2);
 	}
+	
+	
+	private String getKey(int i, int j) {
+		return "" + i + j;
+	}
+	
 }

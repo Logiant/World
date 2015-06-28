@@ -33,7 +33,7 @@ public class Game {
 		graphics.initialize();
 
 		world.Build(graphics);
-	//	p.setPosition(world.getLand());
+		p.setPosition(world.getLand());
 		p.initialize(graphics);
 		
 		
@@ -55,7 +55,7 @@ public class Game {
 		p.update();
 		physics();
 		cam.update();
-
+		world.update(p.transform.position, graphics);
 		graphics.setSun(new Vector3((float)Math.cos(t), (float)Math.sin(t), 0));
 
 		graphics.transform(new Vector3(), new Quaternion()); //undo all transformation

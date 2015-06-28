@@ -11,6 +11,7 @@ public class RegionManager {
 
 	Chunk[][] chunks;
 
+	public int checksum;
 
 
 	public RegionManager(int x, int y) {
@@ -62,5 +63,23 @@ public class RegionManager {
 
 		
 		return chunks[xC][zC].height;
+	}
+
+
+
+	public void createVAO(VBORender g) {
+		for (int i = 0; i < NUM_CHUNKS; i++) {
+			for (int j = 0; j < NUM_CHUNKS; j++) {
+				chunks[i][j].createVAO(g);
+			}
+		}		
+	}
+	
+	public void destroyVAO(VBORender g) {
+		for (int i = 0; i < NUM_CHUNKS; i++) {
+			for (int j = 0; j < NUM_CHUNKS; j++) {
+				chunks[i][j].destroyVAO(g);
+			}
+		}		
 	}
 }

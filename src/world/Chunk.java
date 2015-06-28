@@ -8,8 +8,8 @@ import generation.biomes.BIOME;
 import generation.biomes.BiomeToVoxel;
 
 public class Chunk {
-	public static final int CHUNK_WIDTH = 3;
-	public static final int CHUNK_DEPTH = 3;
+	public static final int CHUNK_WIDTH = 2;
+	public static final int CHUNK_DEPTH = 2;
 	public static final int CHUNK_HEIGHT = 16;
 
 	private int drawId;
@@ -18,10 +18,13 @@ public class Chunk {
 	int numVoxels;
 	Voxel[][][] world;
 	int[][] height;
+	
+	boolean drawable = false;
 
 	int dx, dz;
 	float xOff, zOff;
-	
+	boolean wasLoaded = false;
+
 	public Chunk(int xPos, int zPos, float xOff, float zOff) {
 		dx = xPos * CHUNK_WIDTH;
 		dz = zPos * CHUNK_DEPTH;
@@ -31,13 +34,13 @@ public class Chunk {
 	public int[][] getMap() {
 		return height;
 	}
-	
-	
+
+
 	public void Build(int[][] map, BIOME[][] biomes, VBORender graphics) {
 		int[] maxPos = {0, 0};
 		int maxHeight = 0;
 		height = new int[CHUNK_WIDTH][CHUNK_DEPTH];
-		
+
 		world = new Voxel[CHUNK_WIDTH][CHUNK_DEPTH][CHUNK_HEIGHT];
 		for (int i = 0; i < CHUNK_WIDTH; i++) {
 			for (int j = 0; j < CHUNK_DEPTH; j++) {
@@ -48,7 +51,7 @@ public class Chunk {
 				}
 				for (int h = 0; h < CHUNK_HEIGHT; h++) {
 					world[i][j][h] = BiomeToVoxel.getVoxel(biomes[i][j], World.VOXEL_SIZE);
-					
+
 					world[i][j][h].translate(new Vector3(i*World.VOXEL_SIZE + xOff, h*World.VOXEL_SIZE, j*World.VOXEL_SIZE + zOff));
 					world[i][j][h].setVisible(false);
 					numVoxels ++;
@@ -59,13 +62,11 @@ public class Chunk {
 				}
 			}
 		}
-
-		drawId = graphics.createVBO(getVerts(), getColors(), getIndices());
-		indicesCount = getIndices().length;
 	}
 
 	public void draw(VBORender graphics) {
-		graphics.render(drawId, indicesCount);
+		if (drawable)
+			graphics.render(drawId, indicesCount);
 	}
 
 
@@ -104,14 +105,28 @@ public class Chunk {
 			for (int j = 0; j < CHUNK_DEPTH; j++) {
 				for (int h = 0; h < CHUNK_HEIGHT; h++) {
 					if (world[i][j][h].isVisible()) {
-						world[i][j][h].indexOffset(offset);
+						if (!wasLoaded) {
+							world[i][j][h].indexOffset(offset);
+						}
 						inds = ArrayHelper.CopyArray(inds, world[i][j][h].indices);
 						offset += 8;
 					}
 				}
 			}
 		}
+		wasLoaded = true;
 		return inds;
+	}
+
+	public void createVAO(VBORender graphics) {
+		drawable = true;
+		drawId = graphics.createVBO(getVerts(), getColors(), getIndices());
+		indicesCount = getIndices().length;		
+	}
+
+	public void destroyVAO(VBORender g) {
+		drawable = false;
+		g.deleteVAO(drawId);
 	}
 
 }

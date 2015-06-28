@@ -370,6 +370,9 @@ public class VBORender {
 		}
 	}
 
+	public void deleteVAO(int vaoId) {
+		GL30.glDeleteVertexArrays(vaoId);
+	}
 
 	private String checkError(int code) {
 		String error = "";
