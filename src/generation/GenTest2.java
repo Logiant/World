@@ -1,6 +1,7 @@
 package generation;
 
 import generation.biomes.BIOME;
+import generation.civ.CityGen;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -20,19 +21,23 @@ public class GenTest2 {
 	BufferedImage waterImage;
 	BufferedImage moistureImage;
 	BufferedImage biomeImage;
+	
+	BufferedImage cityImage;
 
 	String directory;
 
-	int size = 64; //bufferedimage size
+	int size = 512; //bufferedimage size ~512 is recommended
 
 	Heightmap heightGen;
 	ColorGen colorGen;
 	WaterGen waterGen;
 	BiomeGen biomeGen;
+	CityGen cityGen;
 
 	
 	float[][] heightmap;
 	BIOME[][] biomes;
+	float[][] cities;
 	
 	public float[][] getMap() {
 		return heightmap;
@@ -92,6 +97,11 @@ public class GenTest2 {
 		dt = Math.round((System.nanoTime() - startTime)/1000000000f * 100)/100;
 		System.out.println("Complete after " + dt + " seconds\n");
 		startTime = System.nanoTime();
+		
+		System.out.println("Picking cities...");
+		cities = cityGen.buildCities(heightmap, moisture, binary);
+		dt = Math.round((System.nanoTime() - startTime)/1000000000f * 100)/100;
+		System.out.println("Complete after " + dt + " seconds\n");
 		
 		System.out.println("Generating image data...");
 		
@@ -154,7 +164,15 @@ public class GenTest2 {
 
 				waterImage.setRGB(i, j, color);
 
-
+				
+				if (cities[i][j] > 0.5) {
+					r = 0; g = 0; b = 0;
+				} else if (cities[i][j] > 0) {
+					r = 128; g = 128; b = 128;
+				}
+				
+				color = (a << 24) | (r << 16) | (g << 8) | b;
+				cityImage.setRGB(i, j, color);
 
 				r = 0; g = (int)(255*(moisture[i][j])); b = (int)(255*(moisture[i][j]));
 				if (moisture[i][j] == 1) r = 255;
@@ -225,6 +243,7 @@ public class GenTest2 {
 		ImageIO.write(waterImage, "png", new File(directory, "WaterMap.png"));
 		ImageIO.write(moistureImage, "png", new File(directory, "Moisture.png"));
 		ImageIO.write(biomeImage, "png", new File(directory, "Biomes.png"));
+		ImageIO.write(cityImage, "png", new File(directory, "Cities.png"));
 
 		System.out.println("Generation Complete!");
 	}
@@ -236,6 +255,7 @@ public class GenTest2 {
 		colorGen = new ColorGen(seed);
 		waterGen = new WaterGen(seed);
 		biomeGen = new BiomeGen(seed);
+		cityGen = new CityGen(seed);
 
 		//system directory and images
 		directory = System.getProperty("user.dir") + "\\TestImages";
@@ -247,6 +267,7 @@ public class GenTest2 {
 		waterImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 		moistureImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 		biomeImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+		cityImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
 
 
 	}
