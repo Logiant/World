@@ -2,6 +2,7 @@ package main;
 
 
 
+import input.Mouse;
 import entities.Transform;
 import util.Matrix4;
 import util.Time;
@@ -20,7 +21,12 @@ public class Camera {
 	private Vector3 desiredRotation;
 	
 	private float bias = 0.01f;
-
+	
+	float scrollSpeed = 8f;
+	float xLimit = 5;
+	float yLimit = 5;
+	
+	
 	Vector3 linVel;
 	Vector3 rotVel;
 
@@ -46,6 +52,8 @@ public class Camera {
 	
 	public void update() {
 
+		changeFollow();
+		
 		desiredPosition = target.getPosition();
 		desiredRotation = target.getRotation();
 		
@@ -61,6 +69,17 @@ public class Camera {
 		rotation.x = desiredRotation.x; rotation.y = desiredRotation.y; rotation.z = desiredRotation.z;
 
 		updateView();
+	}
+	
+	
+	private void changeFollow() {
+		if (Mouse.RightDown) {
+			follow.x += Mouse.DX * scrollSpeed * Time.dt/1000;
+			follow.y -= Mouse.DY * scrollSpeed * Time.dt/1000;
+			follow.x = Math.min(Math.max(follow.x, -xLimit), xLimit);
+			follow.y = Math.min(Math.max(follow.y, 0), 2*yLimit);
+
+		}
 	}
 	
 	
@@ -101,11 +120,11 @@ public class Camera {
 	public Matrix4 genView(Transform t) {
 		
 		Matrix4 viewMatrix = Matrix4.Identity();
-		viewMatrix.translate(new Vector3(t.position.x + position.x, t.position.y+position.y, t.position.z+position.z));
+		viewMatrix.translate(new Vector3(t.position.x+position.x , t.position.y+position.y, t.position.z+position.z));
 
 		Matrix4 rotationMat = Matrix4.Identity();
 		
-		double yTheta = -(-t.rotation.y + rotation.y)*Math.PI/180;
+		double yTheta = -(t.rotation.y + rotation.y)*Math.PI/180;
 		rotationMat.m00 = (float)Math.cos(yTheta);
 		rotationMat.m02 = (float)Math.sin(yTheta);
 		rotationMat.m20 = (float)-Math.sin(yTheta);
@@ -115,7 +134,7 @@ public class Camera {
 
 		rotationMat = Matrix4.Identity();
 		
-		double xTheta = -rotation.x*Math.PI/180;
+		double xTheta = -(t.rotation.x + rotation.x)*Math.PI/180;
 		rotationMat.m00 = 1;
 		rotationMat.m11 = (float)Math.cos(xTheta);
 		rotationMat.m12 = (float)-Math.sin(xTheta);

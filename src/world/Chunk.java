@@ -70,8 +70,7 @@ public class Chunk {
 	//		buildHouse(xMax, yMax, zMax, world);
 
 		}
-		int[] drawData = graphics.createVBO(getVerts(), getColors(), getIndices());
-		drawId = drawData[0];
+		drawId = graphics.createVBO(getVerts(), getColors(), getIndices());
 		indicesCount = getIndices().length;
 	}
 

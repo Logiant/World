@@ -4,7 +4,7 @@ public class Time {
 
 	public static float dt; //delta in ms
 	
-	private static long lastTime;
+	private static long lastTime = System.nanoTime();
 		
 	public static void update() {
 		long time = System.nanoTime();

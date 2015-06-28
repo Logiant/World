@@ -29,6 +29,12 @@ public class VBORender {
 	int fsId; //fragment shader
 	int pId; //shader program id
 
+	//sun shader values
+	int vsIdS; //vertex shader
+	int gsIdS; //geometry shader
+	int fsIdS; //fragment shader
+	int pIdS; //shader program id
+
 	public void initialize() {
 		shaderSetup();
 		int errorCheckValue = GL11.glGetError();
@@ -46,7 +52,7 @@ public class VBORender {
 		}
 	}
 
-	public int[] createVBO(float[] vertices, float[] colors, int[] indices) {
+	public int createVBO(float[] vertices, float[] colors, int[] indices) {
 		//create the buffers to hold vertex color and index data
 		FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(vertices.length);
 		verticesBuffer.put(vertices);
@@ -86,21 +92,28 @@ public class VBORender {
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboiId);
 		// Deselect (bind to 0) the VAO
 		GL30.glBindVertexArray(0);
-		int[] data = {vaoId, vboId, vbocId, vboiId};
-		
+
 		int errorCheckValue = GL11.glGetError();
 		if (errorCheckValue != GL11.GL_NO_ERROR) {
 			System.out.println("\n"+errorCheckValue);
 			System.out.println("ERROR creating vbo : " + checkError(errorCheckValue));
 			System.exit(-1);
 		}
-		
-		return data;
+
+		return vaoId;
 	}
 
 	public void update(Matrix4 transform) {
-		System.out.println("graphics update");
+
+		int errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR updating: " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
+
 		//bind the shaders
+		GL20.glUseProgram(pId);
 		//grab the MVP matrix location in the shaders
 		int loc = GL20.glGetUniformLocation(pId, "MVP");
 		//load the transform matrix into a float buffer
@@ -109,7 +122,23 @@ public class VBORender {
 		buffer.flip();
 		//load the matrix into the program and then unbind it
 		GL20.glUniformMatrix4fv(loc, false, buffer);
-		int errorCheckValue = GL11.glGetError();
+
+
+
+		//bind the shaders
+		GL20.glUseProgram(pIdS);
+		//grab the MVP matrix location in the shaders
+		loc = GL20.glGetUniformLocation(pIdS, "MVP");
+		//load the transform matrix into a float buffer
+		buffer = BufferUtils.createFloatBuffer(4*4);
+		transform.store(buffer);
+		buffer.flip();
+		//load the matrix into the program and then unbind it
+		GL20.glUniformMatrix4fv(loc, false, buffer);
+		GL20.glUseProgram(pId);
+
+
+		errorCheckValue = GL11.glGetError();
 		if (errorCheckValue != GL11.GL_NO_ERROR) {
 			System.out.println("\n"+errorCheckValue);
 			System.out.println("ERROR updating matrix : " + checkError(errorCheckValue));
@@ -129,23 +158,60 @@ public class VBORender {
 		}
 		// Draw the vertices
 		GL11.glDrawElements(GL11.GL_TRIANGLES, indicesCount, GL11.GL_UNSIGNED_INT, 0);
-		
+
 		errorCheckValue = GL11.glGetError();
 		if (errorCheckValue != GL11.GL_NO_ERROR) {
 			System.out.println("\n"+errorCheckValue);
 			System.out.println("ERROR rendering : " + checkError(errorCheckValue));
 			System.exit(-1);
 		}
-		
+
 		GL30.glBindVertexArray(0);
-		
+
 		errorCheckValue = GL11.glGetError();
 		if (errorCheckValue != GL11.GL_NO_ERROR) {
 			System.out.println("\n"+errorCheckValue);
 			System.out.println("ERROR unbinding vao : " + checkError(errorCheckValue));
 			System.exit(-1);
 		}
-		
+
+	}
+
+	public void renderSun(int vaoId, int indicesCount) {
+		GL20.glUseProgram(pIdS);
+		int errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR using shader : " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
+		// Bind to the VAO that has all the information about the vertices and colors
+		GL30.glBindVertexArray(vaoId);
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR binding vao : " + checkError(errorCheckValue));
+			System.out.println(vaoId);
+			System.exit(-1);
+		}
+		// Draw the vertices
+		GL11.glDrawElements(GL11.GL_POINTS, indicesCount, GL11.GL_UNSIGNED_INT, 0);
+
+		errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR rendering : " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
+
+		GL30.glBindVertexArray(0);
+
+		errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR unbinding vao : " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
+		GL20.glUseProgram(pId);
 	}
 
 	private void shaderSetup() {
@@ -161,13 +227,13 @@ public class VBORender {
 		GL20.glAttachShader(pId, vsId);
 		GL20.glAttachShader(pId, gsId);
 		GL20.glAttachShader(pId, fsId);
-		
+
 		errorCheckValue = GL11.glGetError();
 		if (errorCheckValue != GL11.GL_NO_ERROR) {
 			System.out.println("ERROR - Could not create the shaders:" + glGetProgramInfoLog(errorCheckValue));
 			System.exit(-1);
 		}
-		
+
 		// Position information will be attribute 0
 		GL20.glBindAttribLocation(pId, 0, "in_Position");
 		// Color information will be attribute 1
@@ -176,12 +242,50 @@ public class VBORender {
 		GL20.glLinkProgram(pId);
 
 		GL20.glValidateProgram(pId);
-		
+
 		errorCheckValue = GL11.glGetError();
 		if (errorCheckValue != GL11.GL_NO_ERROR) {
 			System.out.println("ERROR - Could not create the shaders:" + glGetProgramInfoLog(errorCheckValue));
 			System.exit(-1);
 		}
+
+		// sun shader setup
+		errorCheckValue = GL11.glGetError();
+		// Load the vertex shader
+		vsIdS = this.loadShader("Shaders/Sun/sunVertex.glsl", GL20.GL_VERTEX_SHADER);
+		// Load the geometry shader
+		gsIdS = this.loadShader("Shaders/Sun/sunGeometry.glsl", GL32.GL_GEOMETRY_SHADER);
+		// Load the fragment shader
+		fsIdS = this.loadShader("Shaders/Sun/sunFragment.glsl", GL20.GL_FRAGMENT_SHADER);
+		// Create a new shader program that links both shaders
+		pIdS = GL20.glCreateProgram();
+		GL20.glAttachShader(pIdS, vsIdS);
+		GL20.glAttachShader(pIdS, gsIdS);
+		GL20.glAttachShader(pIdS, fsIdS);
+
+		errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("ERROR - Could not create the shaders:" + glGetProgramInfoLog(errorCheckValue));
+			System.exit(-1);
+		}
+
+		// Position information will be attribute 0
+		GL20.glBindAttribLocation(pIdS, 0, "in_Position");
+		// Color information will be attribute 1
+		GL20.glBindAttribLocation(pIdS, 1, "in_Color");
+
+		GL20.glLinkProgram(pIdS);
+
+		GL20.glValidateProgram(pIdS);
+
+		errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("ERROR - Could not create the shaders:" + glGetProgramInfoLog(errorCheckValue));
+			System.exit(-1);
+		}
+
+
+
 	}
 
 	private int loadShader(String filename, int type) {
@@ -214,7 +318,14 @@ public class VBORender {
 	}
 
 	public void transform(Vector3 trans, Quaternion rot) {
-		System.out.println("transform");
+
+		int errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR tran: " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
+
 		//bind the shaders
 		//grab the MVP matrix location in the shaders
 		int tLoc = GL20.glGetUniformLocation(pId, "TRAN");
@@ -224,10 +335,42 @@ public class VBORender {
 		GL20.glUniform3f(tLoc, trans.x, trans.y, trans.z);
 		GL20.glUniform4f(rLoc, rot.x, rot.y, rot.z, rot.w);
 
+		errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR transforming: " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
+
 	}
-	
-	
-	
+
+	public void setSun(Vector3 sunPos) {
+		int errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR sunnung: " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
+		GL20.glUseProgram(pId);
+		int loc = GL20.glGetUniformLocation(pId, "SUNPOS");
+		GL20.glUniform3f(loc, sunPos.x, sunPos.y, sunPos.z);
+
+		GL20.glUseProgram(pIdS);
+
+
+		loc = GL20.glGetUniformLocation(pIdS, "SUNPOS");
+		GL20.glUniform3f(loc, sunPos.x, sunPos.y, sunPos.z);
+		GL20.glUseProgram(pId);
+
+		errorCheckValue = GL11.glGetError();
+		if (errorCheckValue != GL11.GL_NO_ERROR) {
+			System.out.println("\n"+errorCheckValue);
+			System.out.println("ERROR setting sun: " + checkError(errorCheckValue));
+			System.exit(-1);
+		}
+	}
+
+
 	private String checkError(int code) {
 		String error = "";
 		switch(code) {
@@ -239,14 +382,14 @@ public class VBORender {
 		case GL11.GL_OUT_OF_MEMORY: error = "Out of Memory"; break;
 		case GL11.GL_STACK_UNDERFLOW: error = "Stack Underflow"; break;
 		case GL11.GL_STACK_OVERFLOW: error = "Stack Overflow"; break;
-			
+
 		}
-		
-		
+
+
 		return error;
 	}
-	
-	
-	
-	
+
+
+
+
 }

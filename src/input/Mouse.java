@@ -21,6 +21,9 @@ public class Mouse {
 	public static float X;
 	public static float Y;
 	
+	public static boolean LeftDown;
+	public static boolean RightDown;
+
 	//doublebuffers for grabbing mouse and screen information
 	DoubleBuffer xPos;
 	DoubleBuffer yPos;
@@ -53,9 +56,19 @@ public class Mouse {
         //get last cursor position
         lastX = xPos.get(0);
         lastY = yPos.get(0);
+        
+        Mouse.DX = (Mouse.X - (float)lastX);
+        Mouse.DY = (Mouse.Y - (float)lastY);
+
+        
         //convert to floats for static usage
         Mouse.X = (float) lastX;
         Mouse.Y = (float) lastY;
+        
+                
+        Mouse.LeftDown = glfwGetMouseButton(window, 0) == 1; 
+        Mouse.RightDown = glfwGetMouseButton(window, 1) == 1; 
+
         //if the cursor is grabbed
 		if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
 			//get screen size

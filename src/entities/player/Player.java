@@ -18,7 +18,7 @@ public class Player {
 	float gravity = -0.01f;
 
 	VBORender graphics;
-	int drawId; int vertId; int indicesCount;
+	int drawId; int indicesCount;
 	Matrix4 viewMatrix;
 
 
@@ -68,9 +68,7 @@ public class Player {
 
 	public void initialize(VBORender graphics) {
 		this.graphics = graphics;
-		int[] drawData = graphics.createVBO(verts, colors, indices);
-		drawId = drawData[0];
-		vertId = drawData[1];
+		drawId = graphics.createVBO(verts, colors, indices);
 		indicesCount = indices.length;
 	}
 

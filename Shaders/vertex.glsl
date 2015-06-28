@@ -3,6 +3,7 @@
 uniform mat4 MVP;
 uniform vec3 TRAN;
 uniform vec4 QUAT;
+uniform vec3 SUNPOS;
 
 in vec4 in_Position;
 in vec4 in_Color;
@@ -19,7 +20,7 @@ out VertexData
 void main(void) {
 
 	//default light direction
-	vertex.lightDir = vec3(1, -1, -1);
+	vertex.lightDir = -normalize(SUNPOS);
     
     //quaternion rotation
 	vec3 temp = 2*cross(QUAT.xyz, in_Position.xyz);
