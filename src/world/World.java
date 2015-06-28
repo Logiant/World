@@ -3,11 +3,9 @@ package world;
 import java.io.IOException;
 import java.util.Random;
 
-import org.lwjgl.system.linux.SysIOctl;
 
 import generation.GenTest2;
 import main.VBORender;
-import util.ArrayHelper;
 import util.Vector3;
 
 public class World {
@@ -15,6 +13,8 @@ public class World {
 	int width = 5;
 	int height = 5;
 
+	int playerX; int playerZ;
+	
 	public static float VOXEL_SIZE = 1f;
 
 	Random rGen;
@@ -59,9 +59,13 @@ public class World {
 
 
 	public void render() {
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
-				regions[i][j].draw(graphics);
+		
+		int dx = 50; int dz = 50;
+		
+		for (int i = playerX-dx; i <= playerX+dx; i++) {
+			for (int j = playerZ-dz; j <= playerZ+dz; j++) {
+				if (i >= 0 && j >= 0 && i < width && j < height)
+					regions[i][j].draw(graphics);
 			}
 		}	
 	}
@@ -87,12 +91,13 @@ public class World {
 		
 		int xInR = xV%(RegionManager.NUM_CHUNKS*Chunk.CHUNK_WIDTH); int zInR = zV%(RegionManager.NUM_CHUNKS*Chunk.CHUNK_DEPTH);
 	
+		System.out.println(xR + ", " + zR);
+		playerX = xR; playerZ = zR;
 
 		
 		if (xR < width && zR < height && xR >= 0 && zR >= 0 &&
 				xInR >= 0 && zInR >= 0) {	
-			System.out.println(xInR + ", " + zInR);
-
+			
 			int[][] m = regions[xR][zR].getHeight(xInR, zInR);
 			int xVinC = xInR%Chunk.CHUNK_WIDTH;
 			int zVinC = zInR%Chunk.CHUNK_DEPTH;
