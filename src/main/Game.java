@@ -33,7 +33,7 @@ public class Game {
 		graphics.initialize();
 
 		world.Build(graphics);
-		p.setPosition(world.getLand());
+	//	p.setPosition(world.getLand());
 		p.initialize(graphics);
 		
 		

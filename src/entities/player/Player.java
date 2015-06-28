@@ -93,8 +93,7 @@ public class Player {
 		pos.x -= size;
 
 		h = Math.max(world.sampleHeight(pos) + World.VOXEL_SIZE/2f, h);
-
-
+		
 		float dy = -(transform.position.y - h - size/2f);
 
 

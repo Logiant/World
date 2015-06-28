@@ -23,7 +23,7 @@ public class GenTest2 {
 
 	String directory;
 
-	int size = 256; //bufferedimage size
+	int size = 64; //bufferedimage size
 
 	Heightmap heightGen;
 	ColorGen colorGen;

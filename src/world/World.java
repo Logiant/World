@@ -3,6 +3,8 @@ package world;
 import java.io.IOException;
 import java.util.Random;
 
+import org.lwjgl.system.linux.SysIOctl;
+
 import generation.GenTest2;
 import main.VBORender;
 import util.ArrayHelper;
@@ -17,7 +19,8 @@ public class World {
 
 	Random rGen;
 
-	Chunk[][] chunk;
+	RegionManager[][] regions;
+
 	float[][] map;
 	GenTest2 gen;
 	VBORender graphics;
@@ -33,7 +36,7 @@ public class World {
 		}
 		map = gen.getMap();
 		rGen = new Random(gen.getSeed());
-		width = map.length / Chunk.CHUNK_WIDTH; height = map.length / Chunk.CHUNK_DEPTH;
+		width = map.length-1; height = map.length-1;
 		System.out.println("# chunks: " + width + ", " + height);
 		System.out.println("MAPSIZE: " + map.length);
 		int[][] world = new int[map.length][map[0].length];
@@ -43,11 +46,13 @@ public class World {
 			}
 		}
 
-		chunk = new Chunk[width][height];
+		regions = new RegionManager[width][height];
+
+
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
-				chunk[i][j] = new Chunk(i, j);
-				chunk[i][j].Build(world, gen.getBiomes(), graphics);
+				regions[i][j] = new RegionManager(i, j);
+				regions[i][j].Build(world, gen.getBiomes(), graphics);
 			}
 		}
 	}
@@ -56,39 +61,11 @@ public class World {
 	public void render() {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
-				chunk[i][j].draw(graphics);
+				regions[i][j].draw(graphics);
 			}
-		}	}
-
-	public float[] getVerts() {
-		float[] verts = new float[0];
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
-				verts = ArrayHelper.CopyArray(verts, chunk[i][j].getVerts());
-			}
-		}
-		return verts;
+		}	
 	}
 
-	public float[] getColors() {
-		float[] colors = new float[0];
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
-				colors = ArrayHelper.CopyArray(colors, chunk[i][j].getColors());
-			}
-		}
-		return colors;
-	}
-
-	public int[] getIndices() {
-		int[] inds = new int[0];
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
-				inds = ArrayHelper.CopyArray(inds, chunk[i][j].getIndices());
-			}
-		}
-		return inds;
-	}
 
 
 	public Vector3 getLand() {
@@ -105,17 +82,24 @@ public class World {
 
 
 	public float sampleHeight(Vector3 position) {
-		int xi = (int)(position.x/VOXEL_SIZE); int zi = (int)(position.z/VOXEL_SIZE);	
-		int xc = xi/Chunk.CHUNK_WIDTH; int zc = zi/Chunk.CHUNK_DEPTH;	
+		int xV = (int)(position.x/VOXEL_SIZE); int zV = (int)(position.z/VOXEL_SIZE);	
+		int xR = xV/(RegionManager.NUM_CHUNKS)/Chunk.CHUNK_WIDTH; int zR = zV/(RegionManager.NUM_CHUNKS)/Chunk.CHUNK_DEPTH;	
+		
+		int xInR = xV%(RegionManager.NUM_CHUNKS*Chunk.CHUNK_WIDTH); int zInR = zV%(RegionManager.NUM_CHUNKS*Chunk.CHUNK_DEPTH);
+	
 
-				
-		if (xc<width && zc<height && xi >= 0 && zi >= 0) {		
-			int[][] m = chunk[xc][zc].getMap();
-			xc = xi%Chunk.CHUNK_WIDTH;
-			zc = zi%Chunk.CHUNK_DEPTH;			
-			return m[xc][zc]*VOXEL_SIZE + VOXEL_SIZE/2;
+		
+		if (xR < width && zR < height && xR >= 0 && zR >= 0 &&
+				xInR >= 0 && zInR >= 0) {	
+			System.out.println(xInR + ", " + zInR);
+
+			int[][] m = regions[xR][zR].getHeight(xInR, zInR);
+			int xVinC = xInR%Chunk.CHUNK_WIDTH;
+			int zVinC = zInR%Chunk.CHUNK_DEPTH;
+						
+			return m[xVinC][zVinC]*VOXEL_SIZE + VOXEL_SIZE/2;
 		}
 
-		return Math.round(gen.getWaterThresh()*Chunk.CHUNK_HEIGHT*VOXEL_SIZE);
+		return Math.round(gen.getWaterThresh()*Chunk.CHUNK_HEIGHT*VOXEL_SIZE + VOXEL_SIZE/2);
 	}
 }
