@@ -6,6 +6,7 @@ import generation.civ.CityGen;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -28,6 +29,8 @@ public class GenTest2 {
 
 	int size = 512; //bufferedimage size ~512 is recommended
 
+	Random rGen = new Random(seed);
+	
 	Heightmap heightGen;
 	ColorGen colorGen;
 	WaterGen waterGen;
@@ -109,6 +112,8 @@ public class GenTest2 {
 		//create images
 		int a = 255; //transparency
 
+		int[] cityColor = new int[cityGen.maxID+1];
+		
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
 
@@ -164,15 +169,18 @@ public class GenTest2 {
 
 				waterImage.setRGB(i, j, color);
 
+				int id = (int) cities[i][j];
+				if (id > 0) {
+					if (cityColor[id] == 0) {
+						r = rGen.nextInt(128) + 127;
+						g = rGen.nextInt(128) + 127;
+						b = rGen.nextInt(128) + 127;
+						color = (a << 24) | (r << 16) | (g << 8) | b;
+						cityColor[id] = color;
+					}
+				} 
 				
-				if (cities[i][j] > 0.5) {
-					r = 0; g = 0; b = 0;
-				} else if (cities[i][j] > 0) {
-					r = 128; g = 128; b = 128;
-				}
-				
-				color = (a << 24) | (r << 16) | (g << 8) | b;
-				cityImage.setRGB(i, j, color);
+				cityImage.setRGB(i, j, cityColor[id]);
 
 				r = 0; g = (int)(255*(moisture[i][j])); b = (int)(255*(moisture[i][j]));
 				if (moisture[i][j] == 1) r = 255;
