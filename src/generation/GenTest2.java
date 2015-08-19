@@ -27,7 +27,7 @@ public class GenTest2 {
 
 	String directory;
 
-	int size = 512; //bufferedimage size ~512 is recommended
+	int size = 128; //bufferedimage size ~512 is recommended
 
 	Random rGen = new Random(seed);
 	
@@ -101,11 +101,11 @@ public class GenTest2 {
 		System.out.println("Complete after " + dt + " seconds\n");
 		startTime = System.nanoTime();
 		
-		System.out.println("Picking cities...");
+/*		System.out.println("Picking cities...");
 		cities = cityGen.buildCities(heightmap, moisture, binary);
 		dt = Math.round((System.nanoTime() - startTime)/1000000000f * 100)/100;
 		System.out.println("Complete after " + dt + " seconds\n");
-		
+*/		
 		System.out.println("Generating image data...");
 		
 		
@@ -169,7 +169,7 @@ public class GenTest2 {
 
 				waterImage.setRGB(i, j, color);
 
-				int id = (int) cities[i][j];
+	/*			int id = (int) cities[i][j];
 				if (id > 0) {
 					if (cityColor[id] == 0) {
 						r = rGen.nextInt(128) + 127;
@@ -181,7 +181,7 @@ public class GenTest2 {
 				} 
 				
 				cityImage.setRGB(i, j, cityColor[id]);
-
+*/
 				r = 0; g = (int)(255*(moisture[i][j])); b = (int)(255*(moisture[i][j]));
 				if (moisture[i][j] == 1) r = 255;
 				color = (a << 24) | (r << 16) | (g << 8) | b;

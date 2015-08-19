@@ -50,7 +50,7 @@ public class Chunk {
 					maxPos[0] = i; maxPos[1] = j;
 				}
 				for (int h = 0; h < CHUNK_HEIGHT; h++) {
-					world[i][j][h] = BiomeToVoxel.getVoxel(biomes[i][j], World.VOXEL_SIZE);
+					world[i][j][h] = BiomeToVoxel.getVoxel(biomes[i][j]);
 
 					world[i][j][h].translate(new Vector3(i*World.VOXEL_SIZE + xOff, h*World.VOXEL_SIZE, j*World.VOXEL_SIZE + zOff));
 					world[i][j][h].setVisible(false);
@@ -76,7 +76,7 @@ public class Chunk {
 			for (int j = 0; j < CHUNK_DEPTH; j++) {
 				for (int h = 0; h < CHUNK_HEIGHT; h++) {
 					if (world[i][j][h].isVisible()) {
-						verts = ArrayHelper.CopyArray(verts, world[i][j][h].verts);
+						verts = ArrayHelper.CopyArray(verts, world[i][j][h].getVerts());
 					}
 				}
 			}
@@ -90,11 +90,11 @@ public class Chunk {
 			for (int j = 0; j < CHUNK_DEPTH; j++) {
 				for (int h = 0; h < CHUNK_HEIGHT; h++) {
 					if (world[i][j][h].isVisible()) {
-						cols = ArrayHelper.CopyArray(cols, world[i][j][h].colors);
+						cols = ArrayHelper.CopyArray(cols, world[i][j][h].getColor());
 					}
 				}
 			}
-		}
+		}		
 		return cols;
 	}
 
@@ -108,7 +108,7 @@ public class Chunk {
 						if (!wasLoaded) {
 							world[i][j][h].indexOffset(offset);
 						}
-						inds = ArrayHelper.CopyArray(inds, world[i][j][h].indices);
+						inds = ArrayHelper.CopyArray(inds, world[i][j][h].getIndices());
 						offset += 8;
 					}
 				}
@@ -120,8 +120,9 @@ public class Chunk {
 
 	public void createVAO(VBORender graphics) {
 		drawable = true;
-		drawId = graphics.createVBO(getVerts(), getColors(), getIndices());
-		indicesCount = getIndices().length;		
+		int[] indices = getIndices();
+		drawId = graphics.createVBO(getVerts(), getColors(), indices);
+		indicesCount = indices.length;
 	}
 
 	public void destroyVAO(VBORender g) {
